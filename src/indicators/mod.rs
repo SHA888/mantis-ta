@@ -1,8 +1,10 @@
 use crate::types::Candle;
 use std::fmt::Debug;
 
+pub mod momentum;
 pub mod trend;
-pub use trend::{EMA, SMA};
+pub use momentum::RSI;
+pub use trend::{EMA, MACD, SMA};
 
 pub trait Indicator: Send + Sync {
     type Output: Clone + Debug;
