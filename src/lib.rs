@@ -1,6 +1,6 @@
-pub mod types;
-pub mod indicators;
-pub mod strategy;
 pub mod backtest;
-pub mod utils;
+pub mod indicators;
 pub mod prelude;
+pub mod strategy;
+pub mod types;
+pub mod utils;

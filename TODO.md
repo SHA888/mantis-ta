@@ -43,12 +43,12 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## 3. Indicator Infrastructure
 
-- [ ] `Indicator` trait (`next`, `reset`, `warmup_period`, `calculate`, `clone_boxed`)
-- [ ] `IncrementalIndicator` trait (`state`, `restore`)
-- [ ] `src/utils/ringbuf.rs` — fixed-size ring buffer for streaming indicators
-- [ ] `src/utils/math.rs` — common math utilities (rounding, etc.)
-- [ ] `src/utils/crossover.rs` — cross-above/below detection helpers
-- [ ] Wire up `prelude.rs` with all public indicator re-exports
+- [x] `Indicator` trait (`next`, `reset`, `warmup_period`, `calculate`, `clone_boxed`)
+- [x] `IncrementalIndicator` trait (`state`, `restore`)
+- [x] `src/utils/ringbuf.rs` — fixed-size ring buffer for streaming indicators
+- [x] `src/utils/math.rs` — common math utilities (rounding, etc.)
+- [x] `src/utils/crossover.rs` — cross-above/below detection helpers
+- [x] Wire up `prelude.rs` with all public indicator re-exports
 
 > **Indicator implementation checklist** (applies to every indicator below):
 > Each indicator must satisfy all 10 points from SPEC §4.2 before merge:
