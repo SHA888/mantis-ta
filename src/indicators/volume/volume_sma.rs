@@ -3,6 +3,30 @@ use crate::types::Candle;
 use crate::utils::ringbuf::RingBuf;
 
 /// Volume Simple Moving Average.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, VolumeSMA};
+/// use mantis_ta::types::Candle;
+///
+/// let vols = [10.0, 20.0, 30.0, 40.0];
+/// let candles: Vec<Candle> = vols
+///     .iter()
+///     .enumerate()
+///     .map(|(i, v)| Candle {
+///         timestamp: i as i64,
+///         open: 0.0,
+///         high: 0.0,
+///         low: 0.0,
+///         close: 0.0,
+///         volume: *v,
+///     })
+///     .collect();
+///
+/// let out = VolumeSMA::new(3).calculate(&candles);
+/// assert!(out.iter().take(2).all(|v| v.is_none()));
+/// assert_eq!(out[2], Some((10.0 + 20.0 + 30.0) / 3.0));
+/// ```
 #[derive(Debug, Clone)]
 pub struct VolumeSMA {
     period: usize,

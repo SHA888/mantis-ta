@@ -3,6 +3,32 @@ use crate::types::Candle;
 use crate::utils::ringbuf::RingBuf;
 
 /// Exponential Moving Average over closing prices.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, EMA};
+/// use mantis_ta::types::Candle;
+///
+/// let prices = [1.0, 2.0, 3.0, 4.0];
+/// let candles: Vec<Candle> = prices
+///     .iter()
+///     .enumerate()
+///     .map(|(i, p)| Candle {
+///         timestamp: i as i64,
+///         open: *p,
+///         high: *p,
+///         low: *p,
+///         close: *p,
+///         volume: 0.0,
+///     })
+///     .collect();
+///
+/// let out = EMA::new(3).calculate(&candles);
+/// // Warmup: first 2 bars None, third is seeded SMA
+/// assert!(out[0].is_none());
+/// assert!(out[1].is_none());
+/// assert!(out[2].is_some());
+/// ```
 #[derive(Debug, Clone)]
 pub struct EMA {
     period: usize,

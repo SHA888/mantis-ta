@@ -3,6 +3,31 @@ use crate::indicators::Indicator;
 use crate::types::{Candle, MacdOutput};
 
 /// Moving Average Convergence Divergence over closing prices.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, MACD};
+/// use mantis_ta::types::Candle;
+///
+/// // 12/26/9 MACD emits after slow + signal warmup
+/// let prices = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0];
+/// let candles: Vec<Candle> = prices
+///     .iter()
+///     .enumerate()
+///     .map(|(i, p)| Candle {
+///         timestamp: i as i64,
+///         open: *p,
+///         high: *p,
+///         low: *p,
+///         close: *p,
+///         volume: 0.0,
+///     })
+///     .collect();
+///
+/// let out = MACD::new(2, 4, 2).calculate(&candles);
+/// assert!(out.iter().take(4).all(|v| v.is_none()));
+/// assert!(out.iter().skip(3).any(|v| v.is_some()));
+/// ```
 #[derive(Debug, Clone)]
 pub struct MACD {
     fast: EMA,

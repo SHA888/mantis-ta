@@ -3,6 +3,35 @@ use crate::types::{Candle, StochasticOutput};
 use crate::utils::ringbuf::RingBuf;
 
 /// Stochastic Oscillator (%K and %D) over high/low/close.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, Stochastic};
+/// use mantis_ta::types::Candle;
+///
+/// let candles: Vec<Candle> = [
+///     (1.0, 0.5, 0.8),
+///     (2.0, 0.5, 1.5),
+///     (3.0, 1.0, 2.5),
+///     (3.5, 1.5, 3.0),
+///     (4.0, 2.0, 3.5),
+/// ]
+/// .iter()
+/// .enumerate()
+/// .map(|(i, (h, l, c))| Candle {
+///     timestamp: i as i64,
+///     open: *c,
+///     high: *h,
+///     low: *l,
+///     close: *c,
+///     volume: 0.0,
+/// })
+/// .collect();
+///
+/// let out = Stochastic::new(3, 3).calculate(&candles);
+/// assert!(out.iter().take(4).all(|v| v.is_none()));
+/// assert!(out.iter().skip(3).any(|v| v.is_some()));
+/// ```
 #[derive(Debug, Clone)]
 pub struct Stochastic {
     k_period: usize,

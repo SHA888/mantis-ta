@@ -3,6 +3,30 @@ use crate::types::{BollingerOutput, Candle};
 use crate::utils::ringbuf::RingBuf;
 
 /// Bollinger Bands over closing prices.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, BollingerBands};
+/// use mantis_ta::types::Candle;
+///
+/// let prices = [1.0, 2.0, 3.0, 4.0];
+/// let candles: Vec<Candle> = prices
+///     .iter()
+///     .enumerate()
+///     .map(|(i, p)| Candle {
+///         timestamp: i as i64,
+///         open: *p,
+///         high: *p,
+///         low: *p,
+///         close: *p,
+///         volume: 0.0,
+///     })
+///     .collect();
+///
+/// let out = BollingerBands::new(3, 2.0).calculate(&candles);
+/// assert!(out.iter().take(2).all(|v| v.is_none()));
+/// assert!(out[2].is_some());
+/// ```
 #[derive(Debug, Clone)]
 pub struct BollingerBands {
     period: usize,

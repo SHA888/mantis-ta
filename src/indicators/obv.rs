@@ -2,6 +2,36 @@ use crate::indicators::Indicator;
 use crate::types::Candle;
 
 /// On-Balance Volume.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, OBV};
+/// use mantis_ta::types::Candle;
+///
+/// let candles: Vec<Candle> = vec![
+///     (10.0, 100.0), // first bar, no prev -> OBV = 0
+///     (12.0, 150.0), // close > prev -> +150
+///     (9.0, 80.0),   // close < prev -> -80
+///     (9.0, 50.0),   // equal -> unchanged
+/// ]
+/// .into_iter()
+/// .enumerate()
+/// .map(|(i, (c, v))| Candle {
+///     timestamp: i as i64,
+///     open: 0.0,
+///     high: 0.0,
+///     low: 0.0,
+///     close: c,
+///     volume: v,
+/// })
+/// .collect();
+///
+/// let out = OBV::new().calculate(&candles);
+/// assert_eq!(out[0], Some(0.0));
+/// assert_eq!(out[1], Some(150.0));
+/// assert_eq!(out[2], Some(70.0));
+/// assert_eq!(out[3], Some(70.0));
+/// ```
 #[derive(Debug, Clone)]
 pub struct OBV {
     current: f64,

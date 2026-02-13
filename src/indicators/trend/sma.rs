@@ -3,6 +3,31 @@ use crate::types::Candle;
 use crate::utils::ringbuf::RingBuf;
 
 /// Simple Moving Average over closing prices.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, SMA};
+/// use mantis_ta::types::Candle;
+///
+/// let candles: Vec<Candle> = [1.0, 2.0, 3.0, 4.0]
+///     .iter()
+///     .enumerate()
+///     .map(|(i, c)| Candle {
+///         timestamp: i as i64,
+///         open: *c,
+///         high: *c,
+///         low: *c,
+///         close: *c,
+///         volume: 0.0,
+///     })
+///     .collect();
+///
+/// let values = SMA::new(3).calculate(&candles);
+/// assert_eq!(values[0], None);
+/// assert_eq!(values[1], None);
+/// assert_eq!(values[2], Some(2.0));
+/// assert_eq!(values[3], Some(3.0));
+/// ```
 #[derive(Debug, Clone)]
 pub struct SMA {
     period: usize,

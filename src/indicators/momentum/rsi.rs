@@ -2,6 +2,31 @@ use crate::indicators::Indicator;
 use crate::types::Candle;
 
 /// Relative Strength Index (RSI) using Wilder smoothing.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, RSI};
+/// use mantis_ta::types::Candle;
+///
+/// let prices = [1.0, 2.0, 3.0, 2.5, 2.0, 2.2];
+/// let candles: Vec<Candle> = prices
+///     .iter()
+///     .enumerate()
+///     .map(|(i, p)| Candle {
+///         timestamp: i as i64,
+///         open: *p,
+///         high: *p,
+///         low: *p,
+///         close: *p,
+///         volume: 0.0,
+///     })
+///     .collect();
+///
+/// let out = RSI::new(3).calculate(&candles);
+/// // Warmup: period + 1 bars before first value
+/// assert!(out.iter().take(3).all(|v| v.is_none()));
+/// assert!(out[3].is_some());
+/// ```
 #[derive(Debug, Clone)]
 pub struct RSI {
     period: usize,

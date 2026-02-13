@@ -2,6 +2,32 @@ use crate::indicators::Indicator;
 use crate::types::{Candle, PivotOutput};
 
 /// Classic floor-trader pivot points calculated from a single candle's OHLC.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, PivotPoints};
+/// use mantis_ta::types::Candle;
+///
+/// let candles: Vec<Candle> = vec![
+///     (1.0, 0.5, 0.8),
+///     (2.0, 0.5, 1.5),
+///     (3.0, 1.0, 2.5),
+/// ]
+/// .into_iter()
+/// .enumerate()
+/// .map(|(i, (h, l, c))| Candle {
+///     timestamp: i as i64,
+///     open: c,
+///     high: h,
+///     low: l,
+///     close: c,
+///     volume: 0.0,
+/// })
+/// .collect();
+///
+/// let out = PivotPoints::new().calculate(&candles);
+/// assert!(out.iter().all(|v| v.is_some()));
+/// ```
 #[derive(Debug, Clone)]
 pub struct PivotPoints;
 

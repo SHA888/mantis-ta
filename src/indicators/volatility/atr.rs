@@ -2,6 +2,34 @@ use crate::indicators::Indicator;
 use crate::types::Candle;
 
 /// Average True Range using Wilder's smoothing.
+///
+/// # Examples
+/// ```rust
+/// use mantis_ta::indicators::{Indicator, ATR};
+/// use mantis_ta::types::Candle;
+///
+/// let candles: Vec<Candle> = [
+///     (1.0, 0.5, 0.8),
+///     (2.0, 0.5, 1.5),
+///     (3.0, 1.0, 2.5),
+///     (3.5, 1.5, 3.0),
+/// ]
+/// .iter()
+/// .enumerate()
+/// .map(|(i, (h, l, c))| Candle {
+///     timestamp: i as i64,
+///     open: *c,
+///     high: *h,
+///     low: *l,
+///     close: *c,
+///     volume: 0.0,
+/// })
+/// .collect();
+///
+/// let out = ATR::new(3).calculate(&candles);
+/// assert!(out.iter().take(2).all(|v| v.is_none()));
+/// assert!(out[2].is_some());
+/// ```
 #[derive(Debug, Clone)]
 pub struct ATR {
     period: usize,

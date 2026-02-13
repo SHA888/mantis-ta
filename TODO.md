@@ -175,15 +175,15 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## 11. Documentation
 
-- [ ] Rustdoc for all public types, traits, and functions — v0.1.0
-- [ ] Runnable doc examples for each indicator — v0.1.0
-- [ ] `examples/basic_indicators.rs` — v0.1.0
-- [ ] `examples/streaming_ema.rs` — v0.1.0
+- [x] Rustdoc for all public types, traits, and functions — v0.1.0
+- [x] Runnable doc examples for each indicator — v0.1.0
+- [x] `examples/basic_indicators.rs` — v0.1.0
+- [x] `examples/streaming_ema.rs` — v0.1.0
 - [ ] `examples/golden_cross_strategy.rs` — v0.2.0
 - [ ] `examples/backtest_momentum.rs` — v0.3.0
 - [ ] `examples/custom_indicator.rs` — v0.4.0
-- [ ] README badges: crates.io, docs.rs, CI, license — v0.1.0
-- [ ] README quick-start examples (already drafted)
+- [x] README badges: crates.io, docs.rs, CI, license — v0.1.0
+- [x] README quick-start examples (already drafted)
 
 ## 12. v0.4.0 — Polish & Community
 
