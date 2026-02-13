@@ -7,39 +7,39 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## 1. Project Scaffolding
 
-- [ ] Create `Cargo.toml` with package metadata, dependencies, dev-dependencies, feature flags, and bench targets
-- [ ] Create `LICENSE-MIT`
-- [ ] Create `LICENSE-APACHE`
-- [ ] Create `CHANGELOG.md`
-- [ ] Create `CONTRIBUTING.md`
-- [ ] Create `src/lib.rs` — public API re-exports
-- [ ] Create `src/prelude.rs` — convenience imports
-- [ ] Create module directory structure:
-  - [ ] `src/types/`
-  - [ ] `src/indicators/` (with `trend/`, `momentum/`, `volatility/`, `volume/`, `support_resistance/` sub-modules)
-  - [ ] `src/strategy/`
-  - [ ] `src/backtest/`
-  - [ ] `src/utils/`
-- [ ] Create `benches/` directory with Criterion harness stubs
-- [ ] Create `tests/` directory structure (`indicator_verification/`, etc.)
-- [ ] Create `fixtures/` directory (`reference/`, `market_data/`)
-- [ ] Create `examples/` directory
+- [x] Create `Cargo.toml` with package metadata, dependencies, dev-dependencies, feature flags, and bench targets
+- [x] Create `LICENSE-MIT`
+- [x] Create `LICENSE-APACHE`
+- [x] Create `CHANGELOG.md`
+- [x] Create `CONTRIBUTING.md`
+- [x] Create `src/lib.rs` — public API re-exports
+- [x] Create `src/prelude.rs` — convenience imports
+- [x] Create module directory structure:
+  - [x] `src/types/`
+  - [x] `src/indicators/` (with `trend/`, `momentum/`, `volatility/`, `volume/`, `support_resistance/` sub-modules)
+  - [x] `src/strategy/`
+  - [x] `src/backtest/`
+  - [x] `src/utils/`
+- [x] Create `benches/` directory with Criterion harness stubs
+- [x] Create `tests/` directory structure (`indicator_verification/`, etc.)
+- [x] Create `fixtures/` directory (`reference/`, `market_data/`)
+- [x] Create `examples/` directory
 
 ## 2. Core Types
 
-- [ ] `Candle` struct (timestamp, OHLCV)
-- [ ] `PriceSource` enum (Open, High, Low, Close, HLC3, OHLC4, HL2)
-- [ ] `Side` enum (Long, Short)
-- [ ] `Signal` enum (Entry, Exit, Hold)
-- [ ] `ExitReason` enum (RuleTriggered, StopLoss, TakeProfit, TrailingStop, DailyLossLimit, DrawdownBreaker)
-- [ ] `Timeframe` enum (M1, M5, M15, M30, H1, H4, D1, W1, MN1)
-- [ ] `MantisError` enum with `thiserror` (InvalidParameter, InsufficientData, StrategyValidation, BacktestError)
-- [ ] `Result<T>` type alias
-- [ ] `MacdOutput` struct
-- [ ] `BollingerOutput` struct
-- [ ] `StochasticOutput` struct
-- [ ] `PivotOutput` struct
-- [ ] Implement `serde` derives behind feature flag for all public types
+- [x] `Candle` struct (timestamp, OHLCV)
+- [x] `PriceSource` enum (Open, High, Low, Close, HLC3, OHLC4, HL2)
+- [x] `Side` enum (Long, Short)
+- [x] `Signal` enum (Entry, Exit, Hold)
+- [x] `ExitReason` enum (RuleTriggered, StopLoss, TakeProfit, TrailingStop, DailyLossLimit, DrawdownBreaker)
+- [x] `Timeframe` enum (M1, M5, M15, M30, H1, H4, D1, W1, MN1)
+- [x] `MantisError` enum with `thiserror` (InvalidParameter, InsufficientData, StrategyValidation, BacktestError)
+- [x] `Result<T>` type alias
+- [x] `MacdOutput` struct
+- [x] `BollingerOutput` struct
+- [x] `StochasticOutput` struct
+- [x] `PivotOutput` struct
+- [x] Implement `serde` derives behind feature flag for all public types
 
 ## 3. Indicator Infrastructure
 
