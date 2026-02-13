@@ -66,7 +66,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [x] Bollinger Bands — `BollingerOutput`
 - [x] ATR (Average True Range) — `f64`
 - [x] Volume SMA — `f64`
-- [ ] OBV (On-Balance Volume) — `f64`
+- [x] OBV (On-Balance Volume) — `f64`
 - [ ] Pivot Points — `PivotOutput`
 
 ## 5. Tier 2 Indicators — v0.2.0 (+15 indicators)
