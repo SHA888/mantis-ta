@@ -1,2 +1,4 @@
 # IDE
 .windsurf
+/target/
+.rustc_info.json
