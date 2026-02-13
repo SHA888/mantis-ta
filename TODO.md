@@ -150,12 +150,12 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## 9. Testing Infrastructure
 
-- [ ] `fixtures/generate_references.py` — TA-Lib reference data generator — v0.1.0
-- [ ] Sample market data: `fixtures/market_data/aapl_daily_2y.csv` — v0.1.0
-- [ ] Sample market data: `fixtures/market_data/eurusd_1h_1y.csv` — v0.1.0
-- [ ] Sample market data: `fixtures/market_data/spy_daily_5y.csv` — v0.1.0
-- [ ] TA-Lib reference JSONs for all Tier 1 indicators (SMA periods 5/10/20/50/100/200, EMA same, RSI 7/14/21, MACD 12/26/9, etc.) — v0.1.0
-- [ ] Test harness: `load_reference()` and `load_candles()` helpers — v0.1.0
+- [x] `fixtures/generate_references.py` — TA-Lib reference data generator — v0.1.0
+- [x] Sample market data: `fixtures/market_data/aapl_daily_2y.csv` — v0.1.0
+- [x] Sample market data: `fixtures/market_data/eurusd_1h_1y.csv` — v0.1.0
+- [x] Sample market data: `fixtures/market_data/spy_daily_5y.csv` — v0.1.0
+- [x] TA-Lib reference JSONs for all Tier 1 indicators (SMA periods 5/10/20/50/100/200, EMA same, RSI 7/14/21, MACD 12/26/9, etc.) — v0.1.0
+- [x] Test harness: `load_reference()` and `load_candles()` helpers — v0.1.0
 - [ ] Verification tests for each Tier 1 indicator (TA-Lib parity < 1e-10) — v0.1.0
 - [ ] Unit tests per indicator: edge cases, NaN handling, warmup, reset — v0.1.0
 - [ ] Property-based tests: RSI ∈ [0,100], BB middle = SMA, streaming output = batch output — v0.1.0

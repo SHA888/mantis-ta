@@ -1,1 +1,1 @@
-// Placeholder for integration tests
+mod common;
