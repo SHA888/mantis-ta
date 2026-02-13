@@ -156,10 +156,10 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [x] Sample market data: `fixtures/market_data/spy_daily_5y.csv` — v0.1.0
 - [x] TA-Lib reference JSONs for all Tier 1 indicators (SMA periods 5/10/20/50/100/200, EMA same, RSI 7/14/21, MACD 12/26/9, etc.) — v0.1.0
 - [x] Test harness: `load_reference()` and `load_candles()` helpers — v0.1.0
-- [ ] Verification tests for each Tier 1 indicator (TA-Lib parity < 1e-10) — v0.1.0
-- [ ] Unit tests per indicator: edge cases, NaN handling, warmup, reset — v0.1.0
-- [ ] Property-based tests: RSI ∈ [0,100], BB middle = SMA, streaming output = batch output — v0.1.0
-- [ ] Fuzz tests: random candles never panic, extreme values handled — v0.1.0
+- [x] Verification tests for each Tier 1 indicator (TA-Lib parity < 1e-10) — v0.1.0
+- [x] Unit tests per indicator: edge cases, NaN handling, warmup, reset — v0.1.0
+- [x] Property-based tests: RSI ∈ [0,100], BB middle = SMA, streaming output = batch output — v0.1.0
+- [x] Fuzz tests: random candles never panic, extreme values handled — v0.1.0
 - [ ] Integration tests: builder → eval → signal accuracy — v0.2.0
 - [ ] Strategy composition tests — v0.2.0
 - [ ] Backtest integration tests — v0.3.0

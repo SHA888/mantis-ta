@@ -44,7 +44,7 @@ pub fn load_candles<P: AsRef<Path>>(relative: P) -> Result<Vec<Candle>, Box<dyn 
 
 /// Load a JSON value from `fixtures/reference/`.
 pub fn load_reference_json<P: AsRef<Path>>(relative: P) -> Result<Value, Box<dyn Error>> {
-    let path = fixtures_path().join("reference").join(relative);
+    let path = fixtures_path().join(relative);
     let file = File::open(path)?;
     let value = serde_json::from_reader(file)?;
     Ok(value)

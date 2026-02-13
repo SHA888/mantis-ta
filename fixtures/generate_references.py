@@ -35,7 +35,7 @@ def write_csv(name: str, rows: List[Dict[str, float]]) -> None:
         f.write("timestamp,open,high,low,close,volume\n")
         for r in rows:
             f.write(
-                f"{int(r['timestamp'])},{r['open']:.4f},{r['high']:.4f},{r['low']:.4f},{r['close']:.4f},{r['volume']:.2f}\n"
+                f"{int(r['timestamp'])},{r['open']:.15g},{r['high']:.15g},{r['low']:.15g},{r['close']:.15g},{r['volume']:.15g}\n"
             )
     print(f"wrote {path}")
 

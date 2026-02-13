@@ -7,11 +7,11 @@ pub mod support_resistance;
 pub mod trend;
 pub mod volatility;
 pub mod volume;
-pub use momentum::RSI;
+pub use momentum::{Stochastic, RSI};
 pub use obv::OBV;
 pub use support_resistance::PivotPoints;
 pub use trend::{EMA, MACD, SMA};
-pub use volatility::BollingerBands;
+pub use volatility::{BollingerBands, ATR};
 pub use volume::VolumeSMA;
 
 pub trait Indicator: Send + Sync {
