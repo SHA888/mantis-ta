@@ -63,7 +63,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [x] MACD (Moving Average Convergence Divergence) — `MacdOutput`
 - [x] RSI (Relative Strength Index) — `f64`
 - [x] Stochastic Oscillator — `StochasticOutput`
-- [ ] Bollinger Bands — `BollingerOutput`
+- [x] Bollinger Bands — `BollingerOutput`
 - [ ] ATR (Average True Range) — `f64`
 - [ ] Volume SMA — `f64`
 - [ ] OBV (On-Balance Volume) — `f64`
