@@ -51,10 +51,7 @@ impl Indicator for MACD {
         };
 
         let macd_candle = Self::macd_candle(macd_line);
-        let signal_line = match self.signal.next(&macd_candle) {
-            Some(v) => v,
-            None => return None,
-        };
+        let signal_line = self.signal.next(&macd_candle)?;
 
         let histogram = macd_line - signal_line;
         Some(MacdOutput {

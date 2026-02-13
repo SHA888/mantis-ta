@@ -47,10 +47,7 @@ impl Indicator for Stochastic {
     fn next(&mut self, candle: &Candle) -> Option<Self::Output> {
         self.window.push((candle.high, candle.low));
 
-        let (highest, lowest) = match self.range_high_low() {
-            Some(range) => range,
-            None => return None,
-        };
+        let (highest, lowest) = self.range_high_low()?;
 
         let denom = highest - lowest;
         let k = if denom == 0.0 {
