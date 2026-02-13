@@ -32,3 +32,9 @@ jobs:
 
       - name: Test
         run: cargo test
+
+      - name: Test (all features)
+        run: cargo test --all-features
+
+      - name: Doc tests
+        run: cargo test --doc

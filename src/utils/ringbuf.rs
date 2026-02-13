@@ -37,6 +37,7 @@ impl<T: Clone> RingBuf<T> {
         self.len
     }
 
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
@@ -51,6 +52,7 @@ impl<T: Clone> RingBuf<T> {
     }
 
     /// Get the most recent element (if any).
+    #[allow(dead_code)]
     pub fn latest(&self) -> Option<&T> {
         if self.len == 0 {
             None
