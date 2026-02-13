@@ -2,7 +2,7 @@ use crate::types::Candle;
 use std::fmt::Debug;
 
 pub mod trend;
-pub use trend::SMA;
+pub use trend::{EMA, SMA};
 
 pub trait Indicator: Send + Sync {
     type Output: Clone + Debug;
