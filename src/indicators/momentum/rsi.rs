@@ -97,7 +97,7 @@ impl Indicator for RSI {
     }
 
     fn warmup_period(&self) -> usize {
-        self.period
+        self.period + 1
     }
 
     fn clone_boxed(&self) -> Box<dyn Indicator<Output = Self::Output>> {
@@ -126,13 +126,10 @@ mod tests {
             .collect();
 
         let outputs: Vec<_> = candles.iter().map(|c| rsi.next(c)).collect();
-        assert!(outputs
-            .iter()
-            .take(rsi.warmup_period())
-            .all(|o| o.is_none()));
-        assert!(outputs
-            .iter()
-            .skip(rsi.warmup_period())
-            .any(|o| o.is_some()));
+        let wp = rsi.warmup_period(); // period + 1
+        // First wp-1 outputs should be None
+        assert!(outputs.iter().take(wp - 1).all(|o| o.is_none()));
+        // Output at index wp-1 should be the first Some
+        assert!(outputs[wp - 1].is_some());
     }
 }

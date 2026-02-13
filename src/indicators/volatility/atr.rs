@@ -1,13 +1,12 @@
 use crate::indicators::Indicator;
 use crate::types::Candle;
-use crate::utils::ringbuf::RingBuf;
 
 /// Average True Range using Wilder's smoothing.
 #[derive(Debug, Clone)]
 pub struct ATR {
     period: usize,
     prev_close: Option<f64>,
-    tr_window: RingBuf<f64>,
+    count: usize,
     sum_tr: f64,
     atr: Option<f64>,
 }
@@ -18,7 +17,7 @@ impl ATR {
         Self {
             period,
             prev_close: None,
-            tr_window: RingBuf::new(period, 0.0),
+            count: 0,
             sum_tr: 0.0,
             atr: None,
         }
@@ -43,24 +42,21 @@ impl Indicator for ATR {
 
     fn next(&mut self, candle: &Candle) -> Option<Self::Output> {
         let tr = self.true_range(candle);
-        if let Some(old) = self.tr_window.push(tr) {
-            self.sum_tr -= old;
-        }
-        self.sum_tr += tr;
 
-        let output = if self.atr.is_none() {
-            if self.tr_window.len() < self.period {
-                None
-            } else {
-                let initial = self.sum_tr / self.period as f64;
-                self.atr = Some(initial);
-                self.atr
-            }
-        } else {
-            let prev_atr = self.atr.unwrap();
+        let output = if let Some(prev_atr) = self.atr {
             let next_atr = (prev_atr * (self.period as f64 - 1.0) + tr) / self.period as f64;
             self.atr = Some(next_atr);
             self.atr
+        } else {
+            self.sum_tr += tr;
+            self.count += 1;
+            if self.count >= self.period {
+                let initial = self.sum_tr / self.period as f64;
+                self.atr = Some(initial);
+                self.atr
+            } else {
+                None
+            }
         };
 
         self.prev_close = Some(candle.close);
@@ -69,7 +65,7 @@ impl Indicator for ATR {
 
     fn reset(&mut self) {
         self.prev_close = None;
-        self.tr_window = RingBuf::new(self.period, 0.0);
+        self.count = 0;
         self.sum_tr = 0.0;
         self.atr = None;
     }
@@ -108,13 +104,10 @@ mod tests {
         .collect();
 
         let outputs: Vec<_> = candles.iter().map(|c| atr.next(c)).collect();
-        assert!(outputs
-            .iter()
-            .take(atr.warmup_period())
-            .all(|o| o.is_none()));
-        assert!(outputs
-            .iter()
-            .skip(atr.warmup_period())
-            .any(|o| o.is_some()));
+        let wp = atr.warmup_period();
+        // First wp-1 outputs should be None
+        assert!(outputs.iter().take(wp - 1).all(|o| o.is_none()));
+        // Output at index wp-1 should be the first Some
+        assert!(outputs[wp - 1].is_some());
     }
 }

@@ -53,11 +53,11 @@ impl Indicator for Stochastic {
         };
 
         let denom = highest - lowest;
-        if denom == 0.0 {
-            return None;
-        }
-
-        let k = ((candle.close - lowest) / denom) * 100.0;
+        let k = if denom == 0.0 {
+            50.0
+        } else {
+            ((candle.close - lowest) / denom) * 100.0
+        };
         self.k_values.push(k);
 
         if self.k_values.len() < self.d_period {

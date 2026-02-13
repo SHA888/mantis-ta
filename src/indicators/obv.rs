@@ -5,11 +5,15 @@ use crate::types::Candle;
 #[derive(Debug, Clone)]
 pub struct OBV {
     current: f64,
+    prev_close: Option<f64>,
 }
 
 impl OBV {
     pub fn new() -> Self {
-        Self { current: 0.0 }
+        Self {
+            current: 0.0,
+            prev_close: None,
+        }
     }
 }
 
@@ -23,22 +27,20 @@ impl Indicator for OBV {
     type Output = f64;
 
     fn next(&mut self, candle: &Candle) -> Option<Self::Output> {
-        let vol = candle.volume;
-        // OBV starts at 0, then adds/subtracts volume based on close direction.
-        if vol == 0.0 {
-            return Some(self.current);
+        if let Some(prev) = self.prev_close {
+            match candle.close.partial_cmp(&prev) {
+                Some(std::cmp::Ordering::Greater) => self.current += candle.volume,
+                Some(std::cmp::Ordering::Less) => self.current -= candle.volume,
+                _ => {}
+            }
         }
-
-        match candle.close.partial_cmp(&candle.open) {
-            Some(std::cmp::Ordering::Greater) => self.current += vol,
-            Some(std::cmp::Ordering::Less) => self.current -= vol,
-            _ => {}
-        }
+        self.prev_close = Some(candle.close);
         Some(self.current)
     }
 
     fn reset(&mut self) {
         self.current = 0.0;
+        self.prev_close = None;
     }
 
     fn warmup_period(&self) -> usize {
@@ -57,25 +59,28 @@ mod tests {
     #[test]
     fn obv_moves_with_direction() {
         let mut obv = OBV::new();
+        // close values: 10, 12, 9, 9
         let candles: Vec<Candle> = vec![
-            (1.0, 0.0, 10.0), // up -> +10
-            (1.0, 2.0, 5.0),  // down -> -5
-            (2.0, 2.0, 7.0),  // flat -> 0
+            (10.0, 100.0), // first bar, no prev -> OBV = 0
+            (12.0, 150.0), // close > prev close -> +150
+            (9.0, 80.0),   // close < prev close -> -80
+            (9.0, 50.0),   // close == prev close -> unchanged
         ]
         .into_iter()
-        .map(|(o, c, v)| Candle {
+        .map(|(c, v)| Candle {
             timestamp: 0,
-            open: o,
-            high: o,
-            low: o,
+            open: 0.0,
+            high: 0.0,
+            low: 0.0,
             close: c,
             volume: v,
         })
         .collect();
 
         let outputs: Vec<_> = candles.iter().map(|c| obv.next(c)).collect();
-        assert_eq!(outputs[0], Some(10.0));
-        assert_eq!(outputs[1], Some(5.0));
-        assert_eq!(outputs[2], Some(5.0));
+        assert_eq!(outputs[0], Some(0.0));   // no previous close
+        assert_eq!(outputs[1], Some(150.0)); // 0 + 150
+        assert_eq!(outputs[2], Some(70.0));  // 150 - 80
+        assert_eq!(outputs[3], Some(70.0));  // unchanged
     }
 }
