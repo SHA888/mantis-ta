@@ -40,7 +40,7 @@ def write_csv(name: str, rows: List[Dict[str, float]]) -> None:
     print(f"wrote {path}")
 
 
-def synthetic_candles(n: int = 240) -> List[Dict[str, float]]:
+def synthetic_candles(n: int = 2000) -> List[Dict[str, float]]:
     rows = []
     price = 100.0
     ts = 0

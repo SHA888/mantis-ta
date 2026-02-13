@@ -166,9 +166,9 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## 10. Benchmarks
 
-- [ ] Criterion harness setup (`benches/indicators.rs`, `benches/strategy_eval.rs`, `benches/backtest.rs`) — v0.1.0
-- [ ] Streaming per-bar benchmarks for each Tier 1 indicator (target: < 100 ns) — v0.1.0
-- [ ] Batch 2000-bar benchmarks for each Tier 1 indicator (targets per SPEC §8) — v0.1.0
+- [x] Criterion harness setup (`benches/indicators.rs`, `benches/strategy_eval.rs`, `benches/backtest.rs`) — v0.1.0
+- [x] Streaming per-bar benchmarks for each Tier 1 indicator (target: < 100 ns) — v0.1.0
+- [x] Batch 2000-bar benchmarks for each Tier 1 indicator (targets per SPEC §8) — v0.1.0
 - [ ] Strategy evaluation benchmark: 5 conditions, 2000 bars (target: < 200 µs) — v0.2.0
 - [ ] Full backtest benchmark: 2yr daily, 1 instrument (target: < 5 ms) — v0.3.0
 - [ ] Full backtest benchmark: 2yr daily, 10 instruments (target: < 50 ms) — v0.3.0
