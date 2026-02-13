@@ -1,6 +1,9 @@
 use crate::types::Candle;
 use std::fmt::Debug;
 
+pub mod trend;
+pub use trend::SMA;
+
 pub trait Indicator: Send + Sync {
     type Output: Clone + Debug;
 

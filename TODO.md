@@ -58,7 +58,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## 4. Tier 1 Indicators — v0.1.0 (10 indicators)
 
-- [ ] SMA (Simple Moving Average) — `f64`
+- [x] SMA (Simple Moving Average) — `f64`
 - [ ] EMA (Exponential Moving Average) — `f64`
 - [ ] MACD (Moving Average Convergence Divergence) — `MacdOutput`
 - [ ] RSI (Relative Strength Index) — `f64`
