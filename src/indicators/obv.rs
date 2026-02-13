@@ -78,9 +78,9 @@ mod tests {
         .collect();
 
         let outputs: Vec<_> = candles.iter().map(|c| obv.next(c)).collect();
-        assert_eq!(outputs[0], Some(0.0));   // no previous close
+        assert_eq!(outputs[0], Some(0.0)); // no previous close
         assert_eq!(outputs[1], Some(150.0)); // 0 + 150
-        assert_eq!(outputs[2], Some(70.0));  // 150 - 80
-        assert_eq!(outputs[3], Some(70.0));  // unchanged
+        assert_eq!(outputs[2], Some(70.0)); // 150 - 80
+        assert_eq!(outputs[3], Some(70.0)); // unchanged
     }
 }
