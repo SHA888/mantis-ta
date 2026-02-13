@@ -67,7 +67,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [x] ATR (Average True Range) — `f64`
 - [x] Volume SMA — `f64`
 - [x] OBV (On-Balance Volume) — `f64`
-- [ ] Pivot Points — `PivotOutput`
+- [x] Pivot Points — `PivotOutput`
 
 ## 5. Tier 2 Indicators — v0.2.0 (+15 indicators)
 
@@ -150,39 +150,39 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## 9. Testing Infrastructure
 
-- [ ] `fixtures/generate_references.py` — TA-Lib reference data generator
-- [ ] Sample market data: `fixtures/market_data/aapl_daily_2y.csv`
-- [ ] Sample market data: `fixtures/market_data/eurusd_1h_1y.csv`
-- [ ] Sample market data: `fixtures/market_data/spy_daily_5y.csv`
-- [ ] TA-Lib reference JSONs for all Tier 1 indicators (SMA periods 5/10/20/50/100/200, EMA same, RSI 7/14/21, MACD 12/26/9, etc.)
-- [ ] Test harness: `load_reference()` and `load_candles()` helpers
-- [ ] Verification tests for each Tier 1 indicator (TA-Lib parity < 1e-10)
-- [ ] Unit tests per indicator: edge cases, NaN handling, warmup, reset
-- [ ] Property-based tests: RSI ∈ [0,100], BB middle = SMA, streaming output = batch output
-- [ ] Fuzz tests: random candles never panic, extreme values handled
-- [ ] Integration tests: builder → eval → signal accuracy
-- [ ] Strategy composition tests
-- [ ] Backtest integration tests
+- [ ] `fixtures/generate_references.py` — TA-Lib reference data generator — v0.1.0
+- [ ] Sample market data: `fixtures/market_data/aapl_daily_2y.csv` — v0.1.0
+- [ ] Sample market data: `fixtures/market_data/eurusd_1h_1y.csv` — v0.1.0
+- [ ] Sample market data: `fixtures/market_data/spy_daily_5y.csv` — v0.1.0
+- [ ] TA-Lib reference JSONs for all Tier 1 indicators (SMA periods 5/10/20/50/100/200, EMA same, RSI 7/14/21, MACD 12/26/9, etc.) — v0.1.0
+- [ ] Test harness: `load_reference()` and `load_candles()` helpers — v0.1.0
+- [ ] Verification tests for each Tier 1 indicator (TA-Lib parity < 1e-10) — v0.1.0
+- [ ] Unit tests per indicator: edge cases, NaN handling, warmup, reset — v0.1.0
+- [ ] Property-based tests: RSI ∈ [0,100], BB middle = SMA, streaming output = batch output — v0.1.0
+- [ ] Fuzz tests: random candles never panic, extreme values handled — v0.1.0
+- [ ] Integration tests: builder → eval → signal accuracy — v0.2.0
+- [ ] Strategy composition tests — v0.2.0
+- [ ] Backtest integration tests — v0.3.0
 
 ## 10. Benchmarks
 
-- [ ] Criterion harness setup (`benches/indicators.rs`, `benches/strategy_eval.rs`, `benches/backtest.rs`)
-- [ ] Streaming per-bar benchmarks for each Tier 1 indicator (target: < 100 ns)
-- [ ] Batch 2000-bar benchmarks for each Tier 1 indicator (targets per SPEC §8)
-- [ ] Strategy evaluation benchmark: 5 conditions, 2000 bars (target: < 200 µs)
-- [ ] Full backtest benchmark: 2yr daily, 1 instrument (target: < 5 ms)
-- [ ] Full backtest benchmark: 2yr daily, 10 instruments (target: < 50 ms)
+- [ ] Criterion harness setup (`benches/indicators.rs`, `benches/strategy_eval.rs`, `benches/backtest.rs`) — v0.1.0
+- [ ] Streaming per-bar benchmarks for each Tier 1 indicator (target: < 100 ns) — v0.1.0
+- [ ] Batch 2000-bar benchmarks for each Tier 1 indicator (targets per SPEC §8) — v0.1.0
+- [ ] Strategy evaluation benchmark: 5 conditions, 2000 bars (target: < 200 µs) — v0.2.0
+- [ ] Full backtest benchmark: 2yr daily, 1 instrument (target: < 5 ms) — v0.3.0
+- [ ] Full backtest benchmark: 2yr daily, 10 instruments (target: < 50 ms) — v0.3.0
 
 ## 11. Documentation
 
-- [ ] Rustdoc for all public types, traits, and functions
-- [ ] Runnable doc examples for each indicator
-- [ ] `examples/basic_indicators.rs`
-- [ ] `examples/streaming_ema.rs`
-- [ ] `examples/golden_cross_strategy.rs`
-- [ ] `examples/backtest_momentum.rs`
-- [ ] `examples/custom_indicator.rs`
-- [ ] README badges: crates.io, docs.rs, CI, license
+- [ ] Rustdoc for all public types, traits, and functions — v0.1.0
+- [ ] Runnable doc examples for each indicator — v0.1.0
+- [ ] `examples/basic_indicators.rs` — v0.1.0
+- [ ] `examples/streaming_ema.rs` — v0.1.0
+- [ ] `examples/golden_cross_strategy.rs` — v0.2.0
+- [ ] `examples/backtest_momentum.rs` — v0.3.0
+- [ ] `examples/custom_indicator.rs` — v0.4.0
+- [ ] README badges: crates.io, docs.rs, CI, license — v0.1.0
 - [ ] README quick-start examples (already drafted)
 
 ## 12. v0.4.0 — Polish & Community
@@ -204,11 +204,11 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## 14. CI/CD
 
-- [ ] GitHub Actions CI workflow (`.github/workflows/ci.yml`)
-- [ ] CI steps: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo test --all-features`
-- [ ] CI step: run TA-Lib verification tests
-- [ ] CI step: run Criterion benchmarks (report only, no gate)
-- [ ] Crates.io publish workflow (manual trigger or tag-based)
+- [ ] GitHub Actions CI workflow (`.github/workflows/ci.yml`) — v0.1.0
+- [ ] CI steps: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo test --all-features` — v0.1.0
+- [ ] CI step: run TA-Lib verification tests — v0.1.0
+- [ ] CI step: run Criterion benchmarks (report only, no gate) — v0.2.0
+- [ ] Crates.io publish workflow (manual trigger or tag-based) — v0.1.0
 
 ## 15. Beyond SPEC
 
