@@ -92,7 +92,13 @@ mod tests {
             .collect();
 
         let outputs: Vec<_> = candles.iter().map(|c| bb.next(c)).collect();
-        assert!(outputs.iter().take(bb.warmup_period() - 1).all(|o| o.is_none()));
-        assert!(outputs.iter().skip(bb.warmup_period() - 1).any(|o| o.is_some()));
+        assert!(outputs
+            .iter()
+            .take(bb.warmup_period() - 1)
+            .all(|o| o.is_none()));
+        assert!(outputs
+            .iter()
+            .skip(bb.warmup_period() - 1)
+            .any(|o| o.is_some()));
     }
 }
