@@ -4,7 +4,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/mantis-ta.svg)](https://crates.io/crates/mantis-ta)
 [![Docs.rs](https://docs.rs/mantis-ta/badge.svg)](https://docs.rs/mantis-ta)
-[![CI](https://github.com/user/mantis-ta/actions/workflows/ci.yml/badge.svg)](https://github.com/user/mantis-ta/actions)
+[![CI](https://github.com/SHA888/mantis-ta/actions/workflows/ci.yml/badge.svg)](https://github.com/SHA888/mantis-ta/actions)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#license)
 
 ---
