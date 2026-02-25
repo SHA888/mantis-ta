@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] — 2026-02-25
+
+### Fixed
+- Remove `.unwrap()` panic paths in EMA and RSI indicator hot paths, aligning with SPEC §4.2 "No panics" contract
+
+### Added
+- `CLAUDE.md` for Claude Code guidance
+
 ## [0.1.0] — 2026-02-14
 
 ### Added
