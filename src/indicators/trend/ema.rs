@@ -50,21 +50,20 @@ impl EMA {
 
     #[inline]
     fn update(&mut self, value: f64) -> Option<f64> {
-        if self.ema.is_none() {
-            // Warmup using simple average.
-            self.warmup.push(value);
-            if self.warmup.len() < self.period {
-                return None;
-            }
-            let sum: f64 = self.warmup.iter().copied().sum();
-            let sma = sum / self.period as f64;
-            self.ema = Some(sma);
+        if let Some(prev) = self.ema {
+            let next = (value - prev) * self.multiplier + prev;
+            self.ema = Some(next);
             return self.ema;
         }
 
-        let prev = self.ema.unwrap();
-        let next = (value - prev) * self.multiplier + prev;
-        self.ema = Some(next);
+        // Warmup using simple average.
+        self.warmup.push(value);
+        if self.warmup.len() < self.period {
+            return None;
+        }
+        let sum: f64 = self.warmup.iter().copied().sum();
+        let sma = sum / self.period as f64;
+        self.ema = Some(sma);
         self.ema
     }
 }
