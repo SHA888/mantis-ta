@@ -30,9 +30,13 @@ pub enum CompareTarget {
     /// Compare against a fixed scalar value
     Value(f64),
     /// Compare against another indicator's output
-    Indicator(String), // indicator name/id
+    Indicator(String),
     /// Compare against a scaled value (e.g., ATR * 2.0)
     Scaled { indicator: String, multiplier: f64 },
+    /// Compare against a range of values (lower, upper)
+    Range(f64, f64),
+    /// No compare target (used for unary operators like IsRising/IsFalling)
+    None,
 }
 
 /// A single condition: left indicator, operator, right target.
@@ -192,17 +196,17 @@ impl StrategyBuilder {
     /// Build and validate the strategy.
     pub fn build(self) -> crate::types::Result<Strategy> {
         // Validation rules from SPEC §5.3
-        if self.entry.is_none() {
+        let Some(entry) = self.entry else {
             return Err(crate::types::MantisError::StrategyValidation(
                 "Strategy must have an entry condition".to_string(),
             ));
-        }
+        };
 
-        if self.stop_loss.is_none() {
+        let Some(stop_loss) = self.stop_loss else {
             return Err(crate::types::MantisError::StrategyValidation(
                 "Strategy must have a stop-loss rule".to_string(),
             ));
-        }
+        };
 
         if self.max_position_size_pct <= 0.0 || self.max_position_size_pct > 100.0 {
             return Err(crate::types::MantisError::InvalidParameter {
@@ -239,9 +243,9 @@ impl StrategyBuilder {
         Ok(Strategy {
             name: self.name,
             timeframe: self.timeframe,
-            entry: self.entry.unwrap(),
+            entry,
             exit: self.exit,
-            stop_loss: self.stop_loss.unwrap(),
+            stop_loss,
             take_profit: self.take_profit,
             max_position_size_pct: self.max_position_size_pct,
             max_daily_loss_pct: self.max_daily_loss_pct,
@@ -305,6 +309,36 @@ mod tests {
         let strategy = result.unwrap();
         assert_eq!(strategy.name, "golden_cross");
         assert!(strategy.take_profit.is_some());
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn strategy_serde_round_trip() {
+        let entry = ConditionNode::Condition(Condition::new(
+            "sma_20",
+            Operator::CrossesAbove,
+            CompareTarget::Indicator("sma_50".to_string()),
+        ));
+        let strategy = Strategy::builder("round_trip_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(2.0))
+            .take_profit(TakeProfit::AtrMultiple(1.5))
+            .max_concurrent_positions(3)
+            .build()
+            .unwrap();
+
+        let json = serde_json::to_string(&strategy).unwrap();
+        let deserialized: Strategy = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(strategy.name, deserialized.name);
+        assert_eq!(
+            strategy.max_concurrent_positions,
+            deserialized.max_concurrent_positions
+        );
+        assert_eq!(
+            strategy.max_position_size_pct,
+            deserialized.max_position_size_pct
+        );
     }
 
     #[test]

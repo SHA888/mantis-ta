@@ -18,62 +18,62 @@ impl IndicatorRef {
 
     /// SMA convenience constructor.
     pub fn sma(period: usize) -> Self {
-        Self::new(format!("sma{}", period))
+        Self::new(format!("sma_{}", period))
     }
 
     /// EMA convenience constructor.
     pub fn ema(period: usize) -> Self {
-        Self::new(format!("ema{}", period))
+        Self::new(format!("ema_{}", period))
     }
 
     /// MACD convenience constructor.
     pub fn macd(fast: usize, slow: usize, signal: usize) -> Self {
-        Self::new(format!("macd{}_{}_{}line", fast, slow, signal))
+        Self::new(format!("macd_{}_{}_{}_line", fast, slow, signal))
     }
 
     /// MACD signal line convenience constructor.
     pub fn macd_signal(fast: usize, slow: usize, signal: usize) -> Self {
-        Self::new(format!("macd{}_{}_{}signal", fast, slow, signal))
+        Self::new(format!("macd_{}_{}_{}_signal", fast, slow, signal))
     }
 
     /// RSI convenience constructor.
     pub fn rsi(period: usize) -> Self {
-        Self::new(format!("rsi{}", period))
+        Self::new(format!("rsi_{}", period))
     }
 
     /// Stochastic %K convenience constructor.
     pub fn stoch_k(k_period: usize, d_period: usize) -> Self {
-        Self::new(format!("stoch{}_{}_k", k_period, d_period))
+        Self::new(format!("stoch_{}_{}_k", k_period, d_period))
     }
 
     /// Stochastic %D convenience constructor.
     pub fn stoch_d(k_period: usize, d_period: usize) -> Self {
-        Self::new(format!("stoch{}_{}_d", k_period, d_period))
+        Self::new(format!("stoch_{}_{}_d", k_period, d_period))
     }
 
     /// Bollinger Bands upper convenience constructor.
     pub fn bb_upper(period: usize, std_dev: f64) -> Self {
-        Self::new(format!("bb{}_{}upper", period, std_dev))
+        Self::new(format!("bb_{}_{}_upper", period, std_dev))
     }
 
     /// Bollinger Bands middle convenience constructor.
     pub fn bb_middle(period: usize, std_dev: f64) -> Self {
-        Self::new(format!("bb{}_{}middle", period, std_dev))
+        Self::new(format!("bb_{}_{}_middle", period, std_dev))
     }
 
     /// Bollinger Bands lower convenience constructor.
     pub fn bb_lower(period: usize, std_dev: f64) -> Self {
-        Self::new(format!("bb{}_{}lower", period, std_dev))
+        Self::new(format!("bb_{}_{}_lower", period, std_dev))
     }
 
     /// ATR convenience constructor.
     pub fn atr(period: usize) -> Self {
-        Self::new(format!("atr{}", period))
+        Self::new(format!("atr_{}", period))
     }
 
     /// Volume SMA convenience constructor.
     pub fn volume_sma(period: usize) -> Self {
-        Self::new(format!("volume_sma{}", period))
+        Self::new(format!("volume_sma_{}", period))
     }
 
     /// OBV convenience constructor.
@@ -160,14 +160,30 @@ impl IndicatorRef {
         ))
     }
 
+    /// Create a condition: this indicator equals a value (within epsilon).
+    pub fn equals(self, value: f64) -> ConditionNode {
+        ConditionNode::Condition(Condition::new(
+            self.name,
+            Operator::Equals,
+            CompareTarget::Value(value),
+        ))
+    }
+
+    /// Create a condition: this indicator equals another indicator (within epsilon).
+    pub fn equals_indicator(self, other: IndicatorRef) -> ConditionNode {
+        ConditionNode::Condition(Condition::new(
+            self.name,
+            Operator::Equals,
+            CompareTarget::Indicator(other.name),
+        ))
+    }
+
     /// Create a condition: this indicator is between two values.
-    pub fn is_between(self, lower: f64, _upper: f64) -> ConditionNode {
-        // For now, we'll represent this as a simple condition with the lower bound
-        // A more sophisticated implementation would handle the upper bound separately
+    pub fn is_between(self, lower: f64, upper: f64) -> ConditionNode {
         ConditionNode::Condition(Condition::new(
             self.name,
             Operator::IsBetween,
-            CompareTarget::Value(lower), // This is simplified; a real impl would need both bounds
+            CompareTarget::Range(lower, upper),
         ))
     }
 
@@ -176,7 +192,7 @@ impl IndicatorRef {
         ConditionNode::Condition(Condition::new(
             self.name,
             Operator::IsRising,
-            CompareTarget::Value(0.0), // Placeholder; not used in IsRising
+            CompareTarget::None,
         ))
     }
 
@@ -185,7 +201,7 @@ impl IndicatorRef {
         ConditionNode::Condition(Condition::new(
             self.name,
             Operator::IsFalling,
-            CompareTarget::Value(0.0), // Placeholder; not used in IsFalling
+            CompareTarget::None,
         ))
     }
 
@@ -208,9 +224,18 @@ pub struct ScaledIndicatorRef {
 
 impl ScaledIndicatorRef {
     /// Create a condition: this scaled indicator is above a value.
-    pub fn is_above(self, _value: f64) -> ConditionNode {
+    pub fn is_above_value(self, value: f64) -> ConditionNode {
         ConditionNode::Condition(Condition::new(
-            self.name.clone(),
+            format!("{}*{}", self.name, self.multiplier),
+            Operator::IsAbove,
+            CompareTarget::Value(value),
+        ))
+    }
+
+    /// Create a condition: this scaled indicator is above another indicator.
+    pub fn is_above_indicator(self, other: IndicatorRef) -> ConditionNode {
+        ConditionNode::Condition(Condition::new(
+            other.name,
             Operator::IsAbove,
             CompareTarget::Scaled {
                 indicator: self.name,
@@ -220,9 +245,18 @@ impl ScaledIndicatorRef {
     }
 
     /// Create a condition: this scaled indicator is below a value.
-    pub fn is_below(self, _value: f64) -> ConditionNode {
+    pub fn is_below_value(self, value: f64) -> ConditionNode {
         ConditionNode::Condition(Condition::new(
-            self.name.clone(),
+            format!("{}*{}", self.name, self.multiplier),
+            Operator::IsBelow,
+            CompareTarget::Value(value),
+        ))
+    }
+
+    /// Create a condition: this scaled indicator is below another indicator.
+    pub fn is_below_indicator(self, other: IndicatorRef) -> ConditionNode {
+        ConditionNode::Condition(Condition::new(
+            other.name,
             Operator::IsBelow,
             CompareTarget::Scaled {
                 indicator: self.name,
@@ -249,13 +283,13 @@ mod tests {
     #[test]
     fn indicator_ref_convenience_constructors() {
         let sma = IndicatorRef::sma(20);
-        assert_eq!(sma.name, "sma20");
+        assert_eq!(sma.name, "sma_20");
 
         let ema = IndicatorRef::ema(14);
-        assert_eq!(ema.name, "ema14");
+        assert_eq!(ema.name, "ema_14");
 
         let rsi = IndicatorRef::rsi(14);
-        assert_eq!(rsi.name, "rsi14");
+        assert_eq!(rsi.name, "rsi_14");
 
         let obv = IndicatorRef::obv();
         assert_eq!(obv.name, "obv");
