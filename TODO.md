@@ -5,7 +5,33 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ---
 
-## 1. Project Scaffolding
+## Version Roadmap
+
+| Version | Theme | Platform Dependency |
+|---------|-------|---------------------|
+| **v0.1.0** | ✅ Tier 1 Indicators (10) + Core Types | `mantis-data` can compute indicators |
+| **v0.1.1** | CI/CD + publish workflow + housekeeping | Dev velocity, automated quality gates |
+| **v0.2.0** | Strategy Composition — Types + Builder | `mantis-core` can deserialize/validate strategies |
+| **v0.3.0** | Strategy Evaluation — Batch + Streaming | `mantis-core` orchestrator can generate signals |
+| **v0.4.0** | Backtesting Engine | Platform Phase 2: backtest UI can run strategies |
+| **v0.5.0** | Tier 2 Indicators — Batch A (8) | Broader strategy options for users |
+| **v0.6.0** | Tier 2 Indicators — Batch B (7) + ADX for Regime | `mantis-regime` MVP (ADX-based detection) |
+| **v0.7.0** | Tier 3 Indicators — Batch A (13) + Candlestick Patterns | Advanced strategies, pattern recognition |
+| **v0.8.0** | Tier 3 Indicators — Batch B (12) + Fibonacci/Pivot Variants | Full indicator catalog |
+| **v0.9.0** | Polish — Custom Indicators, ndarray, SIMD, mdBook | Community readiness |
+| **v1.0.0** | Stable — API Freeze, Bindings, Battle-Tested | Production-grade open-source release |
+
+> **Rationale:** The platform (`mantis-core`, `mantis-execution`, `mantis-api`) is blocked on
+> strategy composition (v0.2.0) and backtesting (v0.4.0). Indicator expansion (v0.5.0+) is
+> valuable but not platform-blocking — the 10 Tier 1 indicators cover MVP strategy building.
+> ADX is deliberately placed in v0.6.0 because `mantis-regime` MVP needs it for rule-based
+> regime detection.
+
+---
+
+## ✅ v0.1.0 — Tier 1 Indicators + Core Types (PUBLISHED)
+
+### 1. Project Scaffolding
 
 - [x] Create `Cargo.toml` with package metadata, dependencies, dev-dependencies, feature flags, and bench targets
 - [x] Create `LICENSE-MIT`
@@ -25,7 +51,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [x] Create `fixtures/` directory (`reference/`, `market_data/`)
 - [x] Create `examples/` directory
 
-## 2. Core Types
+### 2. Core Types
 
 - [x] `Candle` struct (timestamp, OHLCV)
 - [x] `PriceSource` enum (Open, High, Low, Close, HLC3, OHLC4, HL2)
@@ -41,7 +67,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [x] `PivotOutput` struct
 - [x] Implement `serde` derives behind feature flag for all public types
 
-## 3. Indicator Infrastructure
+### 3. Indicator Infrastructure
 
 - [x] `Indicator` trait (`next`, `reset`, `warmup_period`, `calculate`, `clone_boxed`)
 - [x] `IncrementalIndicator` trait (`state`, `restore`)
@@ -56,7 +82,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 > `reset()`, no panics, zero allocation in `next()`, Rustdoc, tests (unit + TA-Lib verification),
 > and Criterion benchmarks (streaming + batch).
 
-## 4. Tier 1 Indicators — v0.1.0 (10 indicators)
+### 4. Tier 1 Indicators (10)
 
 - [x] SMA (Simple Moving Average) — `f64`
 - [x] EMA (Exponential Moving Average) — `f64`
@@ -69,73 +95,145 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [x] OBV (On-Balance Volume) — `f64`
 - [x] Pivot Points — `PivotOutput`
 
-## 5. Tier 2 Indicators — v0.2.0 (+15 indicators)
+### 5. Testing Infrastructure
 
-- [ ] WMA (Weighted Moving Average) — `f64`
-- [ ] DEMA (Double Exponential Moving Average) — `f64`
-- [ ] TEMA (Triple Exponential Moving Average) — `f64`
-- [ ] Ichimoku Cloud — `IchimokuOutput`
-- [ ] Parabolic SAR — `f64`
-- [ ] ADX (Average Directional Index) — `AdxOutput`
-- [ ] CCI (Commodity Channel Index) — `f64`
-- [ ] Williams %R — `f64`
-- [ ] ROC (Rate of Change) — `f64`
-- [ ] MFI (Money Flow Index) — `f64`
-- [ ] Keltner Channels — `KeltnerOutput`
-- [ ] Standard Deviation — `f64`
-- [ ] VWAP (Volume Weighted Average Price) — `f64`
-- [ ] Accumulation/Distribution Line — `f64`
-- [ ] Donchian Channels — `DonchianOutput`
+- [x] `fixtures/generate_references.py` — TA-Lib reference data generator
+- [x] Sample market data: `fixtures/market_data/aapl_daily_2y.csv`
+- [x] Sample market data: `fixtures/market_data/eurusd_1h_1y.csv`
+- [x] Sample market data: `fixtures/market_data/spy_daily_5y.csv`
+- [x] TA-Lib reference JSONs for all Tier 1 indicators (SMA periods 5/10/20/50/100/200, EMA same, RSI 7/14/21, MACD 12/26/9, etc.)
+- [x] Test harness: `load_reference()` and `load_candles()` helpers
+- [x] Verification tests for each Tier 1 indicator (TA-Lib parity < 1e-10)
+- [x] Unit tests per indicator: edge cases, NaN handling, warmup, reset
+- [x] Property-based tests: RSI ∈ [0,100], BB middle = SMA, streaming output = batch output
+- [x] Fuzz tests: random candles never panic, extreme values handled
 
-## 6. Tier 3 Indicators — v0.3.0+ (+25 indicators)
+### 6. Benchmarks
 
-- [ ] VWMA (Volume Weighted Moving Average)
-- [ ] Hull Moving Average
-- [ ] ALMA (Arnaud Legoux Moving Average)
-- [ ] Supertrend
-- [ ] Aroon Oscillator
-- [ ] TSI (True Strength Index)
-- [ ] Ultimate Oscillator
-- [ ] Awesome Oscillator
-- [ ] Momentum (simple)
-- [ ] TRIX
-- [ ] Chaikin Volatility
-- [ ] Historical Volatility
-- [ ] Ulcer Index
-- [ ] Chaikin Money Flow
-- [ ] Force Index
-- [ ] Ease of Movement
-- [ ] Volume Profile (basic)
-- [ ] Doji detection
-- [ ] Engulfing pattern
-- [ ] Hammer / Hanging Man
-- [ ] Morning / Evening Star
-- [ ] Three White Soldiers / Black Crows
-- [ ] Fibonacci Retracement
-- [ ] Pivot Points (Fibonacci variant)
-- [ ] Pivot Points (Woodie variant)
+- [x] Criterion harness setup (`benches/indicators.rs`, `benches/strategy_eval.rs`, `benches/backtest.rs`)
+- [x] Streaming per-bar benchmarks for each Tier 1 indicator (target: < 100 ns)
+- [x] Batch 2000-bar benchmarks for each Tier 1 indicator (targets per SPEC §8)
 
-## 7. Strategy Composition Engine — v0.2.0
+### 7. Documentation
+
+- [x] Rustdoc for all public types, traits, and functions
+- [x] Runnable doc examples for each indicator
+- [x] `examples/basic_indicators.rs`
+- [x] `examples/streaming_ema.rs`
+- [x] README badges: crates.io, docs.rs, CI, license
+- [x] README quick-start examples
+
+---
+
+## v0.1.1 — CI/CD + Housekeeping (patch)
+
+> Shipping CI/CD as a patch because it should have been in v0.1.0 and
+> doesn't change public API. Unblocks automated quality gates for all
+> subsequent development.
+
+### CI/CD
+
+- [ ] GitHub Actions CI workflow (`.github/workflows/ci.yml`)
+- [ ] CI steps: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo test --all-features`
+- [ ] CI step: run TA-Lib verification tests
+- [ ] Crates.io publish workflow (manual trigger or tag-based)
+
+### Housekeeping
+
+- [ ] Review and fix any open issues / bug reports from v0.1.0
+- [ ] Ensure `backtest` and `strategy` modules have clear "not yet implemented" docs (not just empty files)
+- [ ] Verify docs.rs build renders correctly (28.1% documented — audit what's missing)
+
+---
+
+## v0.2.0 — Strategy Composition: Types + Builder
+
+> **Platform unblocks:** `mantis-core` can deserialize strategy JSON from the frontend
+> Strategy Builder UI, validate it at build time, and store it. No evaluation yet —
+> that's v0.3.0.
+
+### Strategy Types
 
 - [ ] `Condition` struct (left indicator, operator, right compare target)
 - [ ] `CompareTarget` enum (Value, Indicator, Scaled)
 - [ ] `Operator` enum (CrossesAbove, CrossesBelow, IsAbove, IsBelow, IsBetween, Equals, IsRising, IsFalling)
 - [ ] `ConditionGroup` enum (AllOf, AnyOf)
 - [ ] `ConditionNode` enum (Condition, Group)
+- [ ] `StopLoss` type (ATR multiple, fixed %, trailing)
+- [ ] `TakeProfit` type (ATR multiple, fixed %)
+- [ ] `Strategy` struct
+
+### Indicator References
+
 - [ ] `IndicatorRef` type + convenience constructors (`sma()`, `ema()`, `rsi()`, `macd()`, etc.)
 - [ ] `IndicatorRef` methods: `crosses_above`, `crosses_below`, `is_above`, `is_below`, `is_between`, `is_rising`, `is_falling`, `scaled`
 - [ ] `all_of()` and `any_of()` grouping functions
-- [ ] `Strategy` struct
+
+### Builder API
+
 - [ ] `Strategy::builder()` — fluent builder API
 - [ ] Builder methods: `timeframe`, `entry`, `exit`, `stop_loss`, `take_profit`, `max_position_size_pct`, `max_daily_loss_pct`, `max_drawdown_pct`, `max_concurrent_positions`
-- [ ] `StopLoss` type (ATR multiple, fixed %, etc.)
-- [ ] `TakeProfit` type (ATR multiple, fixed %, etc.)
 - [ ] Strategy validation at `build()` time (all rules from SPEC §5.3)
-- [ ] Strategy evaluation — batch mode (`strategy.evaluate(&candles)`)
-- [ ] Strategy evaluation — streaming mode (`strategy.into_engine()` + `engine.next(&candle)`)
-- [ ] Strategy serialization/deserialization (JSON, behind `serde` feature)
 
-## 8. Backtesting Engine — v0.3.0
+### Serialization
+
+- [ ] Strategy serialization/deserialization (JSON, behind `serde` feature)
+- [ ] Ensure round-trip: `Strategy` → JSON → `Strategy` preserves all fields
+
+### Testing
+
+- [ ] Unit tests for all `Operator` variants
+- [ ] Unit tests for `ConditionGroup` nesting (AllOf containing AnyOf, etc.)
+- [ ] Unit tests for builder validation (missing entry, missing stop-loss, too many conditions, etc.)
+- [ ] Round-trip serialization tests
+- [ ] Strategy composition tests (builder → struct integrity)
+
+### Documentation
+
+- [ ] `examples/golden_cross_strategy.rs` — build a strategy, print its JSON
+- [ ] Rustdoc for all new public types
+
+---
+
+## v0.3.0 — Strategy Evaluation: Batch + Streaming
+
+> **Platform unblocks:** `mantis-core` orchestrator can feed candles into a strategy
+> and receive `Signal::Entry` / `Signal::Exit` / `Signal::Hold` back. This powers
+> both paper trading and live signal generation.
+
+### Evaluation Engine
+
+- [ ] Strategy evaluation — batch mode (`strategy.evaluate(&candles) -> Vec<Signal>`)
+- [ ] Strategy evaluation — streaming mode (`strategy.into_engine()` + `engine.next(&candle) -> Signal`)
+- [ ] Condition evaluator: resolve `IndicatorRef` to computed values, apply `Operator`
+- [ ] Cross-detection state management (previous bar values for CrossesAbove/Below)
+- [ ] Warmup handling: return `Signal::Hold` until all indicators have sufficient data
+
+### Testing
+
+- [ ] Integration tests: builder → eval → signal accuracy (known scenarios)
+- [ ] Golden Cross strategy: verify entry/exit signals against manual calculation
+- [ ] RSI Mean Reversion strategy: verify signals at known oversold/overbought points
+- [ ] Edge cases: strategy with single condition, maximum conditions, nested groups
+- [ ] Streaming vs. batch equivalence: same candles produce same signals in both modes
+
+### Benchmarks
+
+- [ ] Strategy evaluation benchmark: 5 conditions, 2000 bars (target: < 200 µs)
+- [ ] CI step: run Criterion benchmarks (report only, no gate)
+
+### Documentation
+
+- [ ] Update `examples/golden_cross_strategy.rs` — now includes evaluation + signal output
+
+---
+
+## v0.4.0 — Backtesting Engine
+
+> **Platform unblocks:** Platform Phase 2 (Validation Engine). The backtest UI can
+> submit a strategy + historical data and receive metrics, equity curve, and trade log.
+
+### Core Engine
 
 - [ ] `BacktestConfig` struct (initial capital, commission, slippage, execution model, fractional shares, margin)
 - [ ] `ExecutionModel` enum (NextBarOpen, CurrentBarClose)
@@ -143,82 +241,267 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [ ] `backtest()` runner function — main execution loop
 - [ ] `BrokerSim` — simulated broker (fills with slippage)
 - [ ] `Portfolio` — portfolio state tracking, cash accounting, position sizing
+
+### Metrics
+
 - [ ] `BacktestMetrics` struct (all fields from SPEC §6.2: returns, risk-adjusted, drawdown, trade stats, stress, exposure)
 - [ ] Metrics calculation from trade history
-- [ ] Integrity rules enforcement: no lookahead bias, next-bar execution, slippage, commission, no partial fills, cash accounting
-- [ ] Overfitting warnings: minimum trade count (< 30), parameter sensitivity, walk-forward validation utility
+- [ ] Trade log output: entry/exit timestamps, prices, P&L, exit reason, holding period
 
-## 9. Testing Infrastructure
+### Integrity Rules
 
-- [x] `fixtures/generate_references.py` — TA-Lib reference data generator — v0.1.0
-- [x] Sample market data: `fixtures/market_data/aapl_daily_2y.csv` — v0.1.0
-- [x] Sample market data: `fixtures/market_data/eurusd_1h_1y.csv` — v0.1.0
-- [x] Sample market data: `fixtures/market_data/spy_daily_5y.csv` — v0.1.0
-- [x] TA-Lib reference JSONs for all Tier 1 indicators (SMA periods 5/10/20/50/100/200, EMA same, RSI 7/14/21, MACD 12/26/9, etc.) — v0.1.0
-- [x] Test harness: `load_reference()` and `load_candles()` helpers — v0.1.0
-- [x] Verification tests for each Tier 1 indicator (TA-Lib parity < 1e-10) — v0.1.0
-- [x] Unit tests per indicator: edge cases, NaN handling, warmup, reset — v0.1.0
-- [x] Property-based tests: RSI ∈ [0,100], BB middle = SMA, streaming output = batch output — v0.1.0
-- [x] Fuzz tests: random candles never panic, extreme values handled — v0.1.0
-- [ ] Integration tests: builder → eval → signal accuracy — v0.2.0
-- [ ] Strategy composition tests — v0.2.0
-- [ ] Backtest integration tests — v0.3.0
+- [ ] No lookahead bias: indicators see only data up to current bar
+- [ ] Next-bar execution: entries/exits fill at next bar's open (default)
+- [ ] Slippage modeling (configurable, default 0.1% equities, 0.05% forex)
+- [ ] Commission modeling (flat fee or percentage)
+- [ ] Cash accounting: cannot buy more than available cash (no hidden margin)
+- [ ] No partial fills in MVP
 
-## 10. Benchmarks
+### Overfitting Safeguards
 
-- [x] Criterion harness setup (`benches/indicators.rs`, `benches/strategy_eval.rs`, `benches/backtest.rs`) — v0.1.0
-- [x] Streaming per-bar benchmarks for each Tier 1 indicator (target: < 100 ns) — v0.1.0
-- [x] Batch 2000-bar benchmarks for each Tier 1 indicator (targets per SPEC §8) — v0.1.0
-- [ ] Strategy evaluation benchmark: 5 conditions, 2000 bars (target: < 200 µs) — v0.2.0
-- [ ] Full backtest benchmark: 2yr daily, 1 instrument (target: < 5 ms) — v0.3.0
-- [ ] Full backtest benchmark: 2yr daily, 10 instruments (target: < 50 ms) — v0.3.0
+- [ ] Minimum trade count warning (< 30 trades = statistically unreliable)
+- [ ] Excessive condition warning (> 6–7 conditions = potential overfitting)
+- [ ] Parameter sensitivity report (±10% parameter variation impact)
+- [ ] Walk-forward validation utility (in-sample + out-of-sample split, report both)
 
-## 11. Documentation
+### Testing
 
-- [x] Rustdoc for all public types, traits, and functions — v0.1.0
-- [x] Runnable doc examples for each indicator — v0.1.0
-- [x] `examples/basic_indicators.rs` — v0.1.0
-- [x] `examples/streaming_ema.rs` — v0.1.0
-- [ ] `examples/golden_cross_strategy.rs` — v0.2.0
-- [ ] `examples/backtest_momentum.rs` — v0.3.0
-- [ ] `examples/custom_indicator.rs` — v0.4.0
-- [x] README badges: crates.io, docs.rs, CI, license — v0.1.0
-- [x] README quick-start examples (already drafted)
+- [ ] Backtest integration tests: known strategy on known data → verify metrics match hand calculation
+- [ ] No-lookahead-bias test: strategy with future-dependent condition must not generate signals
+- [ ] Cash accounting test: cannot open position larger than available capital
+- [ ] Commission/slippage test: verify they reduce returns appropriately
+- [ ] Edge cases: strategy that never trades, strategy that's always in position
 
-## 12. v0.4.0 — Polish & Community
+### Benchmarks
 
-- [ ] Custom indicator trait for user extensions (public `Indicator` trait is sufficient, but document the pattern)
+- [ ] Full backtest benchmark: 2yr daily, 1 instrument (target: < 5 ms)
+- [ ] Full backtest benchmark: 2yr daily, 10 instruments (target: < 50 ms)
+
+### Documentation
+
+- [ ] `examples/backtest_momentum.rs` — full backtest with metrics output
+- [ ] Rustdoc for all backtest public types
+
+---
+
+## v0.5.0 — Tier 2 Indicators: Batch A (8 indicators)
+
+> Prioritized by usefulness for common strategy patterns. These indicators
+> expand what users can build in the Strategy Builder without needing to
+> wait for the full Tier 2 set.
+
+- [ ] ADX (Average Directional Index) — `AdxOutput` ← **priority: needed by `mantis-regime` MVP**
+- [ ] WMA (Weighted Moving Average) — `f64`
+- [ ] DEMA (Double Exponential Moving Average) — `f64`
+- [ ] TEMA (Triple Exponential Moving Average) — `f64`
+- [ ] CCI (Commodity Channel Index) — `f64`
+- [ ] Williams %R — `f64`
+- [ ] ROC (Rate of Change) — `f64`
+- [ ] Standard Deviation — `f64`
+
+### Testing & Benchmarks
+
+- [ ] TA-Lib reference JSONs for all Batch A indicators
+- [ ] Verification tests (TA-Lib parity < 1e-10)
+- [ ] Unit tests per indicator (edge cases, warmup, reset)
+- [ ] Streaming + batch benchmarks
+
+### Strategy Integration
+
+- [ ] Add `IndicatorRef` convenience constructors for new indicators (`adx()`, `wma()`, `cci()`, etc.)
+- [ ] Verify new indicators work in strategy builder → eval → signal flow
+
+---
+
+## v0.6.0 — Tier 2 Indicators: Batch B (7 indicators)
+
+> Completes Tier 2. ADX from v0.5.0 now enables `mantis-regime` to
+> implement rule-based regime detection (ADX > 25 = trending, etc.).
+
+- [ ] Ichimoku Cloud — `IchimokuOutput`
+- [ ] Parabolic SAR — `f64`
+- [ ] MFI (Money Flow Index) — `f64`
+- [ ] Keltner Channels — `KeltnerOutput`
+- [ ] VWAP (Volume Weighted Average Price) — `f64`
+- [ ] Accumulation/Distribution Line — `f64`
+- [ ] Donchian Channels — `DonchianOutput`
+
+### Testing & Benchmarks
+
+- [ ] TA-Lib reference JSONs for all Batch B indicators
+- [ ] Verification tests (TA-Lib parity < 1e-10)
+- [ ] Unit tests per indicator (edge cases, warmup, reset)
+- [ ] Streaming + batch benchmarks
+
+### Strategy Integration
+
+- [ ] Add `IndicatorRef` convenience constructors for new indicators
+- [ ] Verify new indicators work in strategy builder → eval → signal flow
+
+---
+
+## v0.7.0 — Tier 3 Indicators: Batch A (13 indicators)
+
+> Advanced moving averages, oscillators, and volatility measures.
+
+### Advanced Moving Averages
+
+- [ ] VWMA (Volume Weighted Moving Average)
+- [ ] Hull Moving Average
+- [ ] ALMA (Arnaud Legoux Moving Average)
+
+### Advanced Trend/Momentum
+
+- [ ] Supertrend
+- [ ] Aroon Oscillator
+- [ ] TSI (True Strength Index)
+- [ ] Ultimate Oscillator
+- [ ] Awesome Oscillator
+- [ ] Momentum (simple)
+- [ ] TRIX
+
+### Advanced Volatility/Volume
+
+- [ ] Chaikin Volatility
+- [ ] Historical Volatility
+- [ ] Ulcer Index
+
+### Testing & Benchmarks
+
+- [ ] TA-Lib reference data (where available; some indicators not in TA-Lib — use alternative verified references)
+- [ ] Verification tests, unit tests, streaming + batch benchmarks
+
+### Strategy Integration
+
+- [ ] Add `IndicatorRef` convenience constructors for new indicators
+
+---
+
+## v0.8.0 — Tier 3 Indicators: Batch B (12) + Candlestick Patterns
+
+> Volume-based indicators, candlestick pattern detection, and pivot variants.
+
+### Volume-Based
+
+- [ ] Chaikin Money Flow
+- [ ] Force Index
+- [ ] Ease of Movement
+- [ ] Volume Profile (basic)
+
+### Candlestick Patterns
+
+- [ ] Doji detection
+- [ ] Engulfing pattern
+- [ ] Hammer / Hanging Man
+- [ ] Morning / Evening Star
+- [ ] Three White Soldiers / Black Crows
+
+### Support/Resistance Variants
+
+- [ ] Fibonacci Retracement
+- [ ] Pivot Points (Fibonacci variant)
+- [ ] Pivot Points (Woodie variant)
+
+### Testing & Benchmarks
+
+- [ ] Pattern detection tests against known chart formations
+- [ ] Unit tests, streaming + batch benchmarks
+
+### Strategy Integration
+
+- [ ] Add candlestick pattern support to `ConditionNode` (pattern detected as boolean condition)
+- [ ] Add `IndicatorRef` convenience constructors for new indicators
+
+---
+
+## v0.9.0 — Polish & Community Readiness
+
+### Custom Indicator Support
+
+- [ ] Document the custom indicator pattern (public `Indicator` trait is sufficient — write the guide)
+- [ ] `examples/custom_indicator.rs`
+
+### Optional Features
+
 - [ ] `ndarray` feature — interop with ndarray ecosystem
 - [ ] `simd` feature — SIMD-accelerated batch computation (uses `unsafe`)
+- [ ] `[ADDITION]` Security audit for `simd` feature `unsafe` code
+
+### Documentation Site
+
 - [ ] mdBook documentation site
+- [ ] `[ADDITION]` mdBook content plan — pages: Getting Started, Indicator Catalog, Strategy Guide, Backtest Guide, Custom Indicators, API Reference
+
+### Community
+
 - [ ] Contribution guidelines finalized + good-first-issue labels on GitHub
+- [ ] `[ADDITION]` Formal Tier 4 indicator acceptance process — GitHub issue template, review criteria checklist, required TA-Lib reference
 - [ ] Tier 4 community-driven indicator acceptance (open process)
 
-## 13. v1.0.0 — Stable
+### CI Enhancements
 
+- [ ] `[ADDITION]` Performance regression CI — automated benchmark comparison on PRs (e.g., `critcmp` or GitHub Action for Criterion)
+
+---
+
+## v1.0.0 — Stable Release
+
+> API freeze. No breaking changes after this release.
+
+### Stability
+
+- [ ] `[ADDITION]` API stability review checklist — enumerate public surface, review naming conventions, ensure no accidental exposures
+- [ ] `[ADDITION]` Migration/deprecation guide for pre-1.0 breaking changes
 - [ ] API freeze — no breaking changes after this release
-- [ ] 50+ indicators, all TA-Lib verified
-- [ ] Battle-tested via MANTIS Platform production usage
+- [ ] 50+ indicators, all verified against reference implementations
+
+### Bindings
+
+- [ ] `[ADDITION]` Python/WASM binding scope definition — which APIs to expose, packaging strategy (PyPI / npm), CI for bindings
 - [ ] Python bindings (separate crate: `mantis-ta-python`)
 - [ ] WASM bindings (separate crate: `mantis-ta-wasm`)
 
-## 14. CI/CD
+### Production Validation
 
-- [ ] GitHub Actions CI workflow (`.github/workflows/ci.yml`) — v0.1.0
-- [ ] CI steps: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo test --all-features` — v0.1.0
-- [ ] CI step: run TA-Lib verification tests — v0.1.0
-- [ ] CI step: run Criterion benchmarks (report only, no gate) — v0.2.0
-- [ ] Crates.io publish workflow (manual trigger or tag-based) — v0.1.0
+- [ ] Battle-tested via MANTIS Platform production usage
 
-## 15. Beyond SPEC
+---
 
-> Items below are **not in the current SPEC** but are recommended additions
-> to close gaps between v0.4.0 and v1.0.0.
+## Cross-Cutting Concerns (ongoing, every release)
 
-- [ ] `[ADDITION]` Migration/deprecation guide for pre-1.0 breaking changes (document policy for minor version bumps)
-- [ ] `[ADDITION]` mdBook content plan — pages: Getting Started, Indicator Catalog, Strategy Guide, Backtest Guide, Custom Indicators, API Reference
-- [ ] `[ADDITION]` Python/WASM binding scope definition — which APIs to expose, packaging strategy (PyPI / npm), CI for bindings
-- [ ] `[ADDITION]` Performance regression CI — automated benchmark comparison on PRs (e.g., `critcmp` or GitHub Action for Criterion)
-- [ ] `[ADDITION]` Security audit for `simd` feature `unsafe` code before 1.0 release
-- [ ] `[ADDITION]` Formal Tier 4 indicator acceptance process — GitHub issue template, review criteria checklist, required TA-Lib reference
-- [ ] `[ADDITION]` API stability review checklist before 1.0 freeze — enumerate public surface, review naming conventions, ensure no accidental exposures
+### Quality Gates (every PR)
+
+- `cargo fmt --check`
+- `cargo clippy -- -D warnings`
+- `cargo test` + `cargo test --all-features`
+- TA-Lib verification tests pass
+- New public types have Rustdoc + examples
+- New indicators have Criterion benchmarks
+
+### Changelog
+
+- Update `CHANGELOG.md` with every version (following Keep a Changelog format)
+
+### Versioning Policy
+
+- **Patch** (0.x.Y): Bug fixes, CI/CD, docs — no public API changes
+- **Minor** (0.X.0): New features, new indicators, new public types — may include breaking changes pre-1.0
+- **Major** (X.0.0): Reserved for post-1.0 breaking changes
+
+---
+
+## Platform Dependency Map
+
+```
+mantis-ta version    Platform component unblocked
+─────────────────    ──────────────────────────────────
+v0.1.0 (done)        mantis-data: indicator computation
+v0.2.0               mantis-core: strategy deserialization + validation
+                     Frontend: Strategy Builder can save valid strategies
+v0.3.0               mantis-core: orchestrator signal generation
+                     Platform: paper trading signal loop
+v0.4.0               Platform Phase 2: backtest UI + metrics display
+v0.5.0               mantis-regime: ADX-based regime detection MVP
+v0.6.0+              Expanded strategy options for users (non-blocking)
+v1.0.0               Production-grade open-source release
+```
