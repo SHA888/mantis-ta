@@ -71,32 +71,17 @@ impl Indicator for RSI {
     fn next(&mut self, candle: &Candle) -> Option<Self::Output> {
         let close = candle.close;
 
-        if let Some(prev) = self.prev_close {
-            let change = close - prev;
-            let gain = change.max(0.0);
-            let loss = (-change).max(0.0);
+        let Some(prev) = self.prev_close else {
+            self.prev_close = Some(close);
+            return None;
+        };
 
-            if self.avg_gain.is_none() {
-                // Warmup accumulation.
-                self.gain_sum += gain;
-                self.loss_sum += loss;
-                self.count += 1;
+        let change = close - prev;
+        let gain = change.max(0.0);
+        let loss = (-change).max(0.0);
 
-                if self.count == self.period {
-                    let avg_gain = self.gain_sum / self.period as f64;
-                    let avg_loss = self.loss_sum / self.period as f64;
-                    self.avg_gain = Some(avg_gain);
-                    self.avg_loss = Some(avg_loss);
-                    self.prev_close = Some(close);
-                    return Some(self.compute_rsi(avg_gain, avg_loss));
-                }
-                self.prev_close = Some(close);
-                return None;
-            }
-
+        if let (Some(prev_avg_gain), Some(prev_avg_loss)) = (self.avg_gain, self.avg_loss) {
             // Wilder smoothing
-            let prev_avg_gain = self.avg_gain.unwrap();
-            let prev_avg_loss = self.avg_loss.unwrap();
             let new_avg_gain =
                 (prev_avg_gain * (self.period as f64 - 1.0) + gain) / self.period as f64;
             let new_avg_loss =
@@ -106,6 +91,20 @@ impl Indicator for RSI {
             self.avg_loss = Some(new_avg_loss);
             self.prev_close = Some(close);
             return Some(self.compute_rsi(new_avg_gain, new_avg_loss));
+        }
+
+        // Warmup accumulation
+        self.gain_sum += gain;
+        self.loss_sum += loss;
+        self.count += 1;
+
+        if self.count == self.period {
+            let avg_gain = self.gain_sum / self.period as f64;
+            let avg_loss = self.loss_sum / self.period as f64;
+            self.avg_gain = Some(avg_gain);
+            self.avg_loss = Some(avg_loss);
+            self.prev_close = Some(close);
+            return Some(self.compute_rsi(avg_gain, avg_loss));
         }
 
         self.prev_close = Some(close);
