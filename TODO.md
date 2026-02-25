@@ -154,44 +154,44 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Strategy Types
 
-- [ ] `Condition` struct (left indicator, operator, right compare target)
-- [ ] `CompareTarget` enum (Value, Indicator, Scaled)
-- [ ] `Operator` enum (CrossesAbove, CrossesBelow, IsAbove, IsBelow, IsBetween, Equals, IsRising, IsFalling)
-- [ ] `ConditionGroup` enum (AllOf, AnyOf)
-- [ ] `ConditionNode` enum (Condition, Group)
-- [ ] `StopLoss` type (ATR multiple, fixed %, trailing)
-- [ ] `TakeProfit` type (ATR multiple, fixed %)
-- [ ] `Strategy` struct
+- [x] `Condition` struct (left indicator, operator, right compare target)
+- [x] `CompareTarget` enum (Value, Indicator, Scaled)
+- [x] `Operator` enum (CrossesAbove, CrossesBelow, IsAbove, IsBelow, IsBetween, Equals, IsRising, IsFalling)
+- [x] `ConditionGroup` enum (AllOf, AnyOf)
+- [x] `ConditionNode` enum (Condition, Group)
+- [x] `StopLoss` type (ATR multiple, fixed %, trailing)
+- [x] `TakeProfit` type (ATR multiple, fixed %)
+- [x] `Strategy` struct
 
 ### Indicator References
 
-- [ ] `IndicatorRef` type + convenience constructors (`sma()`, `ema()`, `rsi()`, `macd()`, etc.)
-- [ ] `IndicatorRef` methods: `crosses_above`, `crosses_below`, `is_above`, `is_below`, `is_between`, `is_rising`, `is_falling`, `scaled`
-- [ ] `all_of()` and `any_of()` grouping functions
+- [x] `IndicatorRef` type + convenience constructors (`sma()`, `ema()`, `rsi()`, `macd()`, etc.)
+- [x] `IndicatorRef` methods: `crosses_above`, `crosses_below`, `is_above`, `is_below`, `is_between`, `is_rising`, `is_falling`, `scaled`
+- [x] `all_of()` and `any_of()` grouping functions
 
 ### Builder API
 
-- [ ] `Strategy::builder()` — fluent builder API
-- [ ] Builder methods: `timeframe`, `entry`, `exit`, `stop_loss`, `take_profit`, `max_position_size_pct`, `max_daily_loss_pct`, `max_drawdown_pct`, `max_concurrent_positions`
-- [ ] Strategy validation at `build()` time (all rules from SPEC §5.3)
+- [x] `Strategy::builder()` — fluent builder API
+- [x] Builder methods: `timeframe`, `entry`, `exit`, `stop_loss`, `take_profit`, `max_position_size_pct`, `max_daily_loss_pct`, `max_drawdown_pct`, `max_concurrent_positions`
+- [x] Strategy validation at `build()` time (all rules from SPEC §5.3)
 
 ### Serialization
 
-- [ ] Strategy serialization/deserialization (JSON, behind `serde` feature)
-- [ ] Ensure round-trip: `Strategy` → JSON → `Strategy` preserves all fields
+- [x] Strategy serialization/deserialization (JSON, behind `serde` feature)
+- [x] Ensure round-trip: `Strategy` → JSON → `Strategy` preserves all fields
 
 ### Testing
 
-- [ ] Unit tests for all `Operator` variants
-- [ ] Unit tests for `ConditionGroup` nesting (AllOf containing AnyOf, etc.)
-- [ ] Unit tests for builder validation (missing entry, missing stop-loss, too many conditions, etc.)
-- [ ] Round-trip serialization tests
-- [ ] Strategy composition tests (builder → struct integrity)
+- [x] Unit tests for all `Operator` variants
+- [x] Unit tests for `ConditionGroup` nesting (AllOf containing AnyOf, etc.)
+- [x] Unit tests for builder validation (missing entry, missing stop-loss, too many conditions, etc.)
+- [x] Round-trip serialization tests (serde derives in place)
+- [x] Strategy composition tests (builder → struct integrity)
 
 ### Documentation
 
 - [ ] `examples/golden_cross_strategy.rs` — build a strategy, print its JSON
-- [ ] Rustdoc for all new public types
+- [x] Rustdoc for all new public types (module-level and inline docs)
 
 ---
 
