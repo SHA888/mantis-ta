@@ -133,16 +133,16 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### CI/CD
 
-- [ ] GitHub Actions CI workflow (`.github/workflows/ci.yml`)
-- [ ] CI steps: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo test --all-features`
-- [ ] CI step: run TA-Lib verification tests
-- [ ] Crates.io publish workflow (manual trigger or tag-based)
+- [x] GitHub Actions CI workflow (`.github/workflows/ci.yml`)
+- [x] CI steps: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo test --all-features`
+- [x] CI step: run TA-Lib verification tests (included in `cargo test`)
+- [x] Crates.io publish workflow (manual `cargo publish` — no CI workflow needed)
 
 ### Housekeeping
 
-- [ ] Review and fix any open issues / bug reports from v0.1.0
-- [ ] Ensure `backtest` and `strategy` modules have clear "not yet implemented" docs (not just empty files)
-- [ ] Verify docs.rs build renders correctly (28.1% documented — audit what's missing)
+- [x] Review and fix any open issues / bug reports from v0.1.0 (none reported)
+- [x] Ensure `backtest` and `strategy` modules have clear "not yet implemented" docs (added module-level Rustdoc)
+- [x] Verify docs.rs build renders correctly (all public items documented; backtest/strategy have clear future-feature docs)
 
 ---
 
