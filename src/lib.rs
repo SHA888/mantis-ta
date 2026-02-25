@@ -2,9 +2,12 @@ pub mod indicators;
 pub mod prelude;
 pub mod types;
 
-// Placeholder modules for future features (v0.2.0+)
-pub mod backtest;
+#[cfg(feature = "strategy")]
 pub mod strategy;
+
+// Placeholder module for future features (v0.3.0+)
+#[cfg(feature = "backtest")]
+pub mod backtest;
 
 // Internal utilities
 pub(crate) mod utils;
