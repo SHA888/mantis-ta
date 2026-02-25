@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] — 2026-02-26
+
+### Added
+
+#### Strategy Composition Engine
+- `Condition` struct for composing indicator-based rules (left indicator, operator, right target)
+- `CompareTarget` enum (`Value`, `Indicator`, `Scaled`, `Range`, `None`) for flexible comparisons
+- `Operator` enum (`CrossesAbove`, `CrossesBelow`, `IsAbove`, `IsBelow`, `IsBetween`, `Equals`, `IsRising`, `IsFalling`)
+- `ConditionGroup` enum (`AllOf`, `AnyOf`) for logical grouping
+- `ConditionNode` enum for composable condition trees
+- `StopLoss` type (`FixedPercent`, `AtrMultiple`, `Trailing`)
+- `TakeProfit` type (`FixedPercent`, `AtrMultiple`)
+- `Strategy` struct with fluent builder API and build-time validation
+- `IndicatorRef` type with convenience constructors (`sma()`, `ema()`, `rsi()`, `macd()`, `atr()`, `bb_upper()`, etc.)
+- `IndicatorRef` condition methods: `crosses_above`, `crosses_below`, `is_above`, `is_below`, `is_between`, `is_rising`, `is_falling`, `equals`, `scaled`
+- `ScaledIndicatorRef` for scaled indicator comparisons
+- `all_of()` and `any_of()` condition grouping helpers
+- Builder validation: required entry/exit/stop-loss/take-profit, parameter range checks, nesting depth and group size limits (SPEC §5.3)
+- `PartialEq` derives on all strategy types for testability
+
+#### Feature Flags
+- `strategy` feature flag (included in default features) gating the strategy module
+- `backtest` feature flag gating the backtest placeholder module
+- `required-features` on bench and example targets
+
+#### Serialization
+- Full serde support for all strategy types (behind `serde` feature)
+- Verified JSON round-trip serialization
+
+#### Documentation
+- `examples/golden_cross_strategy.rs` — build a strategy with SMA crossover, serialize to JSON
+- Rustdoc for all new public types and methods
+
+#### Testing
+- Unit tests for all `Operator` variants
+- Unit tests for `ConditionGroup` nesting (AllOf containing AnyOf, depth limits)
+- Builder validation tests (missing fields, out-of-range parameters, oversized groups)
+- Round-trip serialization tests
+- `ScaledIndicatorRef` semantic correctness tests
+
+### Changed
+- Version bump from 0.1.1 to 0.2.0
+- Strategy and backtest modules now gated behind feature flags
+
 ## [0.1.1] — 2026-02-25
 
 ### Fixed
