@@ -190,7 +190,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Documentation
 
-- [ ] `examples/golden_cross_strategy.rs` — build a strategy, print its JSON
+- [x] `examples/golden_cross_strategy.rs` — build a strategy, print its JSON
 - [x] Rustdoc for all new public types (module-level and inline docs)
 
 ---
