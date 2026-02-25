@@ -12,7 +12,7 @@ categories = ["algorithms", "mathematics", "finance"]
 license = "MIT OR Apache-2.0"
 
 [features]
-default = ["serde"]
+default = ["serde", "strategy"]
 serde = ["dep:serde", "dep:serde_json"]
 ndarray = ["dep:ndarray"]
 simd = []
@@ -41,7 +41,13 @@ harness = false
 [[bench]]
 name = "strategy_eval"
 harness = false
+required-features = ["strategy"]
 
 [[bench]]
 name = "backtest"
 harness = false
+required-features = ["backtest"]
+
+[[example]]
+name = "golden_cross_strategy"
+required-features = ["strategy"]
