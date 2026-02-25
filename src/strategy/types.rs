@@ -17,15 +17,15 @@ pub enum Operator {
     IsBetween,
     /// Left equals right (within epsilon)
     Equals,
-    /// Left is rising (current > previous)
-    IsRising,
-    /// Left is falling (current < previous)
-    IsFalling,
+    /// Left is rising over N bars (current > N bars ago)
+    IsRising(u32),
+    /// Left is falling over N bars (current < N bars ago)
+    IsFalling(u32),
 }
 
 /// Right-hand side of a comparison in a condition.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CompareTarget {
     /// Compare against a fixed scalar value
     Value(f64),
@@ -41,7 +41,7 @@ pub enum CompareTarget {
 
 /// A single condition: left indicator, operator, right target.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Condition {
     pub left: String, // indicator name/id
     pub operator: Operator,
@@ -60,7 +60,7 @@ impl Condition {
 
 /// Logical grouping of conditions.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ConditionGroup {
     /// All sub-conditions must be true
     AllOf(Vec<ConditionNode>),
@@ -70,7 +70,7 @@ pub enum ConditionGroup {
 
 /// A node in the condition tree.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ConditionNode {
     Condition(Condition),
     Group(ConditionGroup),
@@ -78,7 +78,7 @@ pub enum ConditionNode {
 
 /// Stop-loss configuration.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum StopLoss {
     /// Fixed percentage below entry
     FixedPercent(f64),
@@ -90,7 +90,7 @@ pub enum StopLoss {
 
 /// Take-profit configuration.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TakeProfit {
     /// Fixed percentage above entry
     FixedPercent(f64),
@@ -98,16 +98,22 @@ pub enum TakeProfit {
     AtrMultiple(f64),
 }
 
+/// Maximum nesting depth for condition groups (SPEC §5.3).
+const MAX_NESTING_DEPTH: usize = 2;
+
+/// Maximum conditions per group (SPEC §5.3).
+const MAX_CONDITIONS_PER_GROUP: usize = 20;
+
 /// A trading strategy composed of conditions and risk rules.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Strategy {
     pub name: String,
     pub timeframe: crate::types::Timeframe,
     pub entry: ConditionNode,
-    pub exit: Option<ConditionNode>,
+    pub exit: ConditionNode,
     pub stop_loss: StopLoss,
-    pub take_profit: Option<TakeProfit>,
+    pub take_profit: TakeProfit,
     pub max_position_size_pct: f64,
     pub max_daily_loss_pct: f64,
     pub max_drawdown_pct: f64,
@@ -193,12 +199,17 @@ impl StrategyBuilder {
         self
     }
 
-    /// Build and validate the strategy.
+    /// Build and validate the strategy (SPEC §5.3).
     pub fn build(self) -> crate::types::Result<Strategy> {
-        // Validation rules from SPEC §5.3
         let Some(entry) = self.entry else {
             return Err(crate::types::MantisError::StrategyValidation(
                 "Strategy must have an entry condition".to_string(),
+            ));
+        };
+
+        let Some(exit) = self.exit else {
+            return Err(crate::types::MantisError::StrategyValidation(
+                "Strategy must have an exit condition".to_string(),
             ));
         };
 
@@ -208,27 +219,33 @@ impl StrategyBuilder {
             ));
         };
 
-        if self.max_position_size_pct <= 0.0 || self.max_position_size_pct > 100.0 {
+        let Some(take_profit) = self.take_profit else {
+            return Err(crate::types::MantisError::StrategyValidation(
+                "Strategy must have a take-profit rule".to_string(),
+            ));
+        };
+
+        if self.max_position_size_pct < 0.1 || self.max_position_size_pct > 100.0 {
             return Err(crate::types::MantisError::InvalidParameter {
                 param: "max_position_size_pct",
                 value: self.max_position_size_pct.to_string(),
-                reason: "must be between 0 and 100",
+                reason: "must be between 0.1 and 100",
             });
         }
 
-        if self.max_daily_loss_pct <= 0.0 || self.max_daily_loss_pct > 100.0 {
+        if self.max_daily_loss_pct < 0.1 || self.max_daily_loss_pct > 50.0 {
             return Err(crate::types::MantisError::InvalidParameter {
                 param: "max_daily_loss_pct",
                 value: self.max_daily_loss_pct.to_string(),
-                reason: "must be between 0 and 100",
+                reason: "must be between 0.1 and 50",
             });
         }
 
-        if self.max_drawdown_pct <= 0.0 || self.max_drawdown_pct > 100.0 {
+        if self.max_drawdown_pct < 1.0 || self.max_drawdown_pct > 100.0 {
             return Err(crate::types::MantisError::InvalidParameter {
                 param: "max_drawdown_pct",
                 value: self.max_drawdown_pct.to_string(),
-                reason: "must be between 0 and 100",
+                reason: "must be between 1 and 100",
             });
         }
 
@@ -240,13 +257,17 @@ impl StrategyBuilder {
             });
         }
 
+        // Validate condition nesting depth and group sizes
+        validate_condition_node(&entry, 0)?;
+        validate_condition_node(&exit, 0)?;
+
         Ok(Strategy {
             name: self.name,
             timeframe: self.timeframe,
             entry,
-            exit: self.exit,
+            exit,
             stop_loss,
-            take_profit: self.take_profit,
+            take_profit,
             max_position_size_pct: self.max_position_size_pct,
             max_daily_loss_pct: self.max_daily_loss_pct,
             max_drawdown_pct: self.max_drawdown_pct,
@@ -255,60 +276,154 @@ impl StrategyBuilder {
     }
 }
 
+/// Recursively validate condition nesting depth and group sizes (SPEC §5.3).
+fn validate_condition_node(node: &ConditionNode, depth: usize) -> crate::types::Result<()> {
+    if depth > MAX_NESTING_DEPTH {
+        return Err(crate::types::MantisError::StrategyValidation(format!(
+            "Condition nesting exceeds maximum depth of {}",
+            MAX_NESTING_DEPTH
+        )));
+    }
+    if let ConditionNode::Group(group) = node {
+        let children = match group {
+            ConditionGroup::AllOf(c) | ConditionGroup::AnyOf(c) => c,
+        };
+        if children.len() > MAX_CONDITIONS_PER_GROUP {
+            return Err(crate::types::MantisError::StrategyValidation(format!(
+                "Condition group exceeds maximum of {} conditions",
+                MAX_CONDITIONS_PER_GROUP
+            )));
+        }
+        for child in children {
+            validate_condition_node(child, depth + 1)?;
+        }
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn sample_condition() -> ConditionNode {
+        ConditionNode::Condition(Condition::new(
+            "sma_20",
+            Operator::CrossesAbove,
+            CompareTarget::Value(100.0),
+        ))
+    }
+
+    /// Helper to build a valid strategy with all mandatory fields.
+    fn valid_builder() -> StrategyBuilder {
+        Strategy::builder("test")
+            .entry(sample_condition())
+            .exit(sample_condition())
+            .stop_loss(StopLoss::FixedPercent(2.0))
+            .take_profit(TakeProfit::FixedPercent(5.0))
+    }
+
     #[test]
     fn builder_requires_entry() {
         let result = Strategy::builder("test")
+            .exit(sample_condition())
             .stop_loss(StopLoss::FixedPercent(2.0))
+            .take_profit(TakeProfit::FixedPercent(5.0))
+            .build();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn builder_requires_exit() {
+        let result = Strategy::builder("test")
+            .entry(sample_condition())
+            .stop_loss(StopLoss::FixedPercent(2.0))
+            .take_profit(TakeProfit::FixedPercent(5.0))
             .build();
         assert!(result.is_err());
     }
 
     #[test]
     fn builder_requires_stop_loss() {
-        let entry = ConditionNode::Condition(Condition::new(
-            "sma20",
-            Operator::CrossesAbove,
-            CompareTarget::Value(100.0),
-        ));
-        let result = Strategy::builder("test").entry(entry).build();
+        let result = Strategy::builder("test")
+            .entry(sample_condition())
+            .exit(sample_condition())
+            .take_profit(TakeProfit::FixedPercent(5.0))
+            .build();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn builder_requires_take_profit() {
+        let result = Strategy::builder("test")
+            .entry(sample_condition())
+            .exit(sample_condition())
+            .stop_loss(StopLoss::FixedPercent(2.0))
+            .build();
         assert!(result.is_err());
     }
 
     #[test]
     fn builder_validates_position_size() {
-        let entry = ConditionNode::Condition(Condition::new(
-            "sma20",
-            Operator::CrossesAbove,
-            CompareTarget::Value(100.0),
-        ));
-        let result = Strategy::builder("test")
-            .entry(entry)
-            .stop_loss(StopLoss::FixedPercent(2.0))
-            .max_position_size_pct(150.0)
-            .build();
+        let result = valid_builder().max_position_size_pct(150.0).build();
+        assert!(result.is_err());
+
+        let result = valid_builder().max_position_size_pct(0.05).build();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn builder_validates_daily_loss_bounds() {
+        let result = valid_builder().max_daily_loss_pct(51.0).build();
+        assert!(result.is_err());
+
+        let result = valid_builder().max_daily_loss_pct(0.05).build();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn builder_validates_drawdown_bounds() {
+        let result = valid_builder().max_drawdown_pct(0.5).build();
         assert!(result.is_err());
     }
 
     #[test]
     fn builder_creates_valid_strategy() {
-        let entry = ConditionNode::Condition(Condition::new(
-            "sma20",
-            Operator::CrossesAbove,
-            CompareTarget::Value(100.0),
-        ));
-        let result = Strategy::builder("golden_cross")
-            .entry(entry)
-            .stop_loss(StopLoss::FixedPercent(2.0))
-            .take_profit(TakeProfit::FixedPercent(5.0))
-            .build();
+        let result = valid_builder().build();
         assert!(result.is_ok());
         let strategy = result.unwrap();
-        assert_eq!(strategy.name, "golden_cross");
-        assert!(strategy.take_profit.is_some());
+        assert_eq!(strategy.name, "test");
+    }
+
+    #[test]
+    fn builder_rejects_excessive_nesting() {
+        // depth 0: Group -> depth 1: Group -> depth 2: Group -> depth 3: Condition (too deep)
+        let leaf = sample_condition();
+        let depth2 = ConditionNode::Group(ConditionGroup::AllOf(vec![leaf]));
+        let depth1 = ConditionNode::Group(ConditionGroup::AllOf(vec![depth2]));
+        let depth0 = ConditionNode::Group(ConditionGroup::AllOf(vec![depth1]));
+
+        let result = valid_builder().entry(depth0).build();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn builder_accepts_valid_nesting() {
+        // depth 0: Group -> depth 1: Group -> depth 2: Condition (within limit)
+        let leaf = sample_condition();
+        let depth1 = ConditionNode::Group(ConditionGroup::AllOf(vec![leaf]));
+        let depth0 = ConditionNode::Group(ConditionGroup::AllOf(vec![depth1]));
+
+        let result = valid_builder().entry(depth0).build();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn builder_rejects_oversized_group() {
+        let conditions: Vec<ConditionNode> = (0..21).map(|_| sample_condition()).collect();
+        let group = ConditionNode::Group(ConditionGroup::AllOf(conditions));
+
+        let result = valid_builder().entry(group).build();
+        assert!(result.is_err());
     }
 
     #[cfg(feature = "serde")]
@@ -319,8 +434,14 @@ mod tests {
             Operator::CrossesAbove,
             CompareTarget::Indicator("sma_50".to_string()),
         ));
+        let exit = ConditionNode::Condition(Condition::new(
+            "sma_20",
+            Operator::CrossesBelow,
+            CompareTarget::Indicator("sma_50".to_string()),
+        ));
         let strategy = Strategy::builder("round_trip_test")
             .entry(entry)
+            .exit(exit)
             .stop_loss(StopLoss::FixedPercent(2.0))
             .take_profit(TakeProfit::AtrMultiple(1.5))
             .max_concurrent_positions(3)
@@ -330,26 +451,18 @@ mod tests {
         let json = serde_json::to_string(&strategy).unwrap();
         let deserialized: Strategy = serde_json::from_str(&json).unwrap();
 
-        assert_eq!(strategy.name, deserialized.name);
-        assert_eq!(
-            strategy.max_concurrent_positions,
-            deserialized.max_concurrent_positions
-        );
-        assert_eq!(
-            strategy.max_position_size_pct,
-            deserialized.max_position_size_pct
-        );
+        assert_eq!(strategy, deserialized);
     }
 
     #[test]
     fn condition_group_nesting() {
         let cond1 = ConditionNode::Condition(Condition::new(
-            "sma20",
+            "sma_20",
             Operator::IsAbove,
             CompareTarget::Value(100.0),
         ));
         let cond2 = ConditionNode::Condition(Condition::new(
-            "rsi14",
+            "rsi_14",
             Operator::IsBelow,
             CompareTarget::Value(70.0),
         ));

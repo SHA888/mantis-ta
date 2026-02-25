@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// Reference to an indicator within a strategy, with convenience methods for building conditions.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IndicatorRef {
     pub name: String,
 }
@@ -187,20 +187,20 @@ impl IndicatorRef {
         ))
     }
 
-    /// Create a condition: this indicator is rising.
-    pub fn is_rising(self) -> ConditionNode {
+    /// Create a condition: this indicator is rising over `bars` bars.
+    pub fn is_rising(self, bars: u32) -> ConditionNode {
         ConditionNode::Condition(Condition::new(
             self.name,
-            Operator::IsRising,
+            Operator::IsRising(bars),
             CompareTarget::None,
         ))
     }
 
-    /// Create a condition: this indicator is falling.
-    pub fn is_falling(self) -> ConditionNode {
+    /// Create a condition: this indicator is falling over `bars` bars.
+    pub fn is_falling(self, bars: u32) -> ConditionNode {
         ConditionNode::Condition(Condition::new(
             self.name,
-            Operator::IsFalling,
+            Operator::IsFalling(bars),
             CompareTarget::None,
         ))
     }
@@ -216,7 +216,7 @@ impl IndicatorRef {
 
 /// A scaled indicator reference for use in conditions.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ScaledIndicatorRef {
     pub name: String,
     pub multiplier: f64,
@@ -235,12 +235,9 @@ impl ScaledIndicatorRef {
     /// Create a condition: this scaled indicator is above another indicator.
     pub fn is_above_indicator(self, other: IndicatorRef) -> ConditionNode {
         ConditionNode::Condition(Condition::new(
-            other.name,
+            format!("{}*{}", self.name, self.multiplier),
             Operator::IsAbove,
-            CompareTarget::Scaled {
-                indicator: self.name,
-                multiplier: self.multiplier,
-            },
+            CompareTarget::Indicator(other.name),
         ))
     }
 
@@ -256,12 +253,9 @@ impl ScaledIndicatorRef {
     /// Create a condition: this scaled indicator is below another indicator.
     pub fn is_below_indicator(self, other: IndicatorRef) -> ConditionNode {
         ConditionNode::Condition(Condition::new(
-            other.name,
+            format!("{}*{}", self.name, self.multiplier),
             Operator::IsBelow,
-            CompareTarget::Scaled {
-                indicator: self.name,
-                multiplier: self.multiplier,
-            },
+            CompareTarget::Indicator(other.name),
         ))
     }
 }
@@ -322,5 +316,50 @@ mod tests {
         let atr = IndicatorRef::atr(14);
         let scaled = atr.scaled(2.0);
         assert_eq!(scaled.multiplier, 2.0);
+    }
+
+    #[test]
+    fn scaled_is_above_indicator_has_correct_semantics() {
+        // atr.scaled(2.0).is_above_indicator(price) should mean "atr*2 is above price"
+        let cond = IndicatorRef::atr(14)
+            .scaled(2.0)
+            .is_above_indicator(IndicatorRef::new("price"));
+        match cond {
+            ConditionNode::Condition(c) => {
+                assert_eq!(c.left, "atr_14*2");
+                assert_eq!(c.operator, Operator::IsAbove);
+                assert_eq!(c.right, CompareTarget::Indicator("price".to_string()));
+            }
+            _ => panic!("expected Condition"),
+        }
+    }
+
+    #[test]
+    fn scaled_is_below_indicator_has_correct_semantics() {
+        // atr.scaled(1.5).is_below_indicator(price) should mean "atr*1.5 is below price"
+        let cond = IndicatorRef::atr(14)
+            .scaled(1.5)
+            .is_below_indicator(IndicatorRef::new("price"));
+        match cond {
+            ConditionNode::Condition(c) => {
+                assert_eq!(c.left, "atr_14*1.5");
+                assert_eq!(c.operator, Operator::IsBelow);
+                assert_eq!(c.right, CompareTarget::Indicator("price".to_string()));
+            }
+            _ => panic!("expected Condition"),
+        }
+    }
+
+    #[test]
+    fn scaled_is_above_value_has_correct_semantics() {
+        let cond = IndicatorRef::atr(14).scaled(2.0).is_above_value(50.0);
+        match cond {
+            ConditionNode::Condition(c) => {
+                assert_eq!(c.left, "atr_14*2");
+                assert_eq!(c.operator, Operator::IsAbove);
+                assert_eq!(c.right, CompareTarget::Value(50.0));
+            }
+            _ => panic!("expected Condition"),
+        }
     }
 }
