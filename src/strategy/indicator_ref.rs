@@ -18,12 +18,12 @@ impl IndicatorRef {
 
     /// SMA convenience constructor.
     pub fn sma(period: usize) -> Self {
-        Self::new(format!("sma_{}", period))
+        Self::new(format!("sma{}", period))
     }
 
     /// EMA convenience constructor.
     pub fn ema(period: usize) -> Self {
-        Self::new(format!("ema_{}", period))
+        Self::new(format!("ema{}", period))
     }
 
     /// MACD convenience constructor.
@@ -38,7 +38,7 @@ impl IndicatorRef {
 
     /// RSI convenience constructor.
     pub fn rsi(period: usize) -> Self {
-        Self::new(format!("rsi_{}", period))
+        Self::new(format!("rsi{}", period))
     }
 
     /// Stochastic %K convenience constructor.
@@ -68,7 +68,7 @@ impl IndicatorRef {
 
     /// ATR convenience constructor.
     pub fn atr(period: usize) -> Self {
-        Self::new(format!("atr_{}", period))
+        Self::new(format!("atr{}", period))
     }
 
     /// Volume SMA convenience constructor.
@@ -277,13 +277,13 @@ mod tests {
     #[test]
     fn indicator_ref_convenience_constructors() {
         let sma = IndicatorRef::sma(20);
-        assert_eq!(sma.name, "sma_20");
+        assert_eq!(sma.name, "sma20");
 
         let ema = IndicatorRef::ema(14);
-        assert_eq!(ema.name, "ema_14");
+        assert_eq!(ema.name, "ema14");
 
         let rsi = IndicatorRef::rsi(14);
-        assert_eq!(rsi.name, "rsi_14");
+        assert_eq!(rsi.name, "rsi14");
 
         let obv = IndicatorRef::obv();
         assert_eq!(obv.name, "obv");
@@ -326,7 +326,7 @@ mod tests {
             .is_above_indicator(IndicatorRef::new("price"));
         match cond {
             ConditionNode::Condition(c) => {
-                assert_eq!(c.left, "atr_14*2");
+                assert_eq!(c.left, "atr14*2");
                 assert_eq!(c.operator, Operator::IsAbove);
                 assert_eq!(c.right, CompareTarget::Indicator("price".to_string()));
             }
@@ -342,7 +342,7 @@ mod tests {
             .is_below_indicator(IndicatorRef::new("price"));
         match cond {
             ConditionNode::Condition(c) => {
-                assert_eq!(c.left, "atr_14*1.5");
+                assert_eq!(c.left, "atr14*1.5");
                 assert_eq!(c.operator, Operator::IsBelow);
                 assert_eq!(c.right, CompareTarget::Indicator("price".to_string()));
             }
@@ -355,7 +355,7 @@ mod tests {
         let cond = IndicatorRef::atr(14).scaled(2.0).is_above_value(50.0);
         match cond {
             ConditionNode::Condition(c) => {
-                assert_eq!(c.left, "atr_14*2");
+                assert_eq!(c.left, "atr14*2");
                 assert_eq!(c.operator, Operator::IsAbove);
                 assert_eq!(c.right, CompareTarget::Value(50.0));
             }

@@ -203,19 +203,19 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Evaluation Engine
 
-- [ ] Strategy evaluation — batch mode (`strategy.evaluate(&candles) -> Vec<Signal>`)
-- [ ] Strategy evaluation — streaming mode (`strategy.into_engine()` + `engine.next(&candle) -> Signal`)
-- [ ] Condition evaluator: resolve `IndicatorRef` to computed values, apply `Operator`
-- [ ] Cross-detection state management (previous bar values for CrossesAbove/Below)
-- [ ] Warmup handling: return `Signal::Hold` until all indicators have sufficient data
+- [x] Strategy evaluation — batch mode (`strategy.evaluate(&candles) -> Vec<Signal>`)
+- [x] Strategy evaluation — streaming mode (`strategy.into_engine()` + `engine.next(&candle) -> Signal`)
+- [x] Condition evaluator: resolve `IndicatorRef` to computed values, apply `Operator`
+- [x] Cross-detection state management (previous bar values for CrossesAbove/Below)
+- [x] Warmup handling: return `Signal::Hold` until all indicators have sufficient data
 
 ### Testing
 
-- [ ] Integration tests: builder → eval → signal accuracy (known scenarios)
-- [ ] Golden Cross strategy: verify entry/exit signals against manual calculation
+- [x] Integration tests: builder → eval → signal accuracy (basic scenarios)
+- [x] Golden Cross strategy: verify entry/exit signals against manual calculation
 - [ ] RSI Mean Reversion strategy: verify signals at known oversold/overbought points
 - [ ] Edge cases: strategy with single condition, maximum conditions, nested groups
-- [ ] Streaming vs. batch equivalence: same candles produce same signals in both modes
+- [x] Streaming vs. batch equivalence: same candles produce same signals in both modes
 
 ### Benchmarks
 
@@ -224,7 +224,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Documentation
 
-- [ ] Update `examples/golden_cross_strategy.rs` — now includes evaluation + signal output
+- [x] Update `examples/golden_cross_strategy.rs` — now includes evaluation + signal output
 
 ---
 

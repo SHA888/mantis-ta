@@ -111,9 +111,9 @@ pub struct Strategy {
     pub name: String,
     pub timeframe: crate::types::Timeframe,
     pub entry: ConditionNode,
-    pub exit: ConditionNode,
+    pub exit: Option<ConditionNode>,
     pub stop_loss: StopLoss,
-    pub take_profit: TakeProfit,
+    pub take_profit: Option<TakeProfit>,
     pub max_position_size_pct: f64,
     pub max_daily_loss_pct: f64,
     pub max_drawdown_pct: f64,
@@ -207,21 +207,9 @@ impl StrategyBuilder {
             ));
         };
 
-        let Some(exit) = self.exit else {
-            return Err(crate::types::MantisError::StrategyValidation(
-                "Strategy must have an exit condition".to_string(),
-            ));
-        };
-
         let Some(stop_loss) = self.stop_loss else {
             return Err(crate::types::MantisError::StrategyValidation(
                 "Strategy must have a stop-loss rule".to_string(),
-            ));
-        };
-
-        let Some(take_profit) = self.take_profit else {
-            return Err(crate::types::MantisError::StrategyValidation(
-                "Strategy must have a take-profit rule".to_string(),
             ));
         };
 
@@ -259,15 +247,17 @@ impl StrategyBuilder {
 
         // Validate condition nesting depth and group sizes
         validate_condition_node(&entry, 0)?;
-        validate_condition_node(&exit, 0)?;
+        if let Some(exit) = &self.exit {
+            validate_condition_node(exit, 0)?;
+        }
 
         Ok(Strategy {
             name: self.name,
             timeframe: self.timeframe,
             entry,
-            exit,
+            exit: self.exit,
             stop_loss,
-            take_profit,
+            take_profit: self.take_profit,
             max_position_size_pct: self.max_position_size_pct,
             max_daily_loss_pct: self.max_daily_loss_pct,
             max_drawdown_pct: self.max_drawdown_pct,
@@ -307,7 +297,7 @@ mod tests {
 
     fn sample_condition() -> ConditionNode {
         ConditionNode::Condition(Condition::new(
-            "sma_20",
+            "sma20",
             Operator::CrossesAbove,
             CompareTarget::Value(100.0),
         ))
@@ -317,9 +307,7 @@ mod tests {
     fn valid_builder() -> StrategyBuilder {
         Strategy::builder("test")
             .entry(sample_condition())
-            .exit(sample_condition())
             .stop_loss(StopLoss::FixedPercent(2.0))
-            .take_profit(TakeProfit::FixedPercent(5.0))
     }
 
     #[test]
@@ -327,38 +315,13 @@ mod tests {
         let result = Strategy::builder("test")
             .exit(sample_condition())
             .stop_loss(StopLoss::FixedPercent(2.0))
-            .take_profit(TakeProfit::FixedPercent(5.0))
-            .build();
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn builder_requires_exit() {
-        let result = Strategy::builder("test")
-            .entry(sample_condition())
-            .stop_loss(StopLoss::FixedPercent(2.0))
-            .take_profit(TakeProfit::FixedPercent(5.0))
             .build();
         assert!(result.is_err());
     }
 
     #[test]
     fn builder_requires_stop_loss() {
-        let result = Strategy::builder("test")
-            .entry(sample_condition())
-            .exit(sample_condition())
-            .take_profit(TakeProfit::FixedPercent(5.0))
-            .build();
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn builder_requires_take_profit() {
-        let result = Strategy::builder("test")
-            .entry(sample_condition())
-            .exit(sample_condition())
-            .stop_loss(StopLoss::FixedPercent(2.0))
-            .build();
+        let result = Strategy::builder("test").entry(sample_condition()).build();
         assert!(result.is_err());
     }
 

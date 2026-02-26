@@ -14,9 +14,11 @@
 //! Batch and streaming evaluation modes are planned for v0.3.0.
 //! See [SPEC.md](../SPEC.md) §5 for detailed requirements.
 
+pub mod evaluator;
 pub mod indicator_ref;
 pub mod types;
 
+pub use evaluator::{evaluate_strategy_batch, strategy_engine, StrategyEngine};
 pub use indicator_ref::{all_of, any_of, IndicatorRef, ScaledIndicatorRef};
 pub use types::{
     CompareTarget, Condition, ConditionGroup, ConditionNode, Operator, StopLoss, Strategy,
