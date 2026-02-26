@@ -1,21 +1,23 @@
 //! Golden cross momentum strategy example.
 //!
-//! Demonstrates building a strategy using the v0.2.0 strategy composition API:
-//! - Entry: SMA(20) crosses above SMA(50)
-//! - Exit: SMA(20) crosses below SMA(50)
+//! Demonstrates building a strategy using the strategy composition API and
+//! evaluating it over a small candle series:
+//! - Entry: SMA(5) crosses above SMA(10)
+//! - Exit: SMA(5) crosses below SMA(10)
 //! - Stop-loss: 2% fixed
 //! - Take-profit: 5% fixed
 //!
 //! The strategy is built using the fluent builder API and serialized to JSON.
+//! It is then evaluated over a small synthetic candle series.
 
 use mantis_ta::prelude::*;
 
 fn main() {
-    // Build entry condition: SMA(20) crosses above SMA(50)
-    let entry = IndicatorRef::sma(20).crosses_above_indicator(IndicatorRef::sma(50));
+    // Build entry condition: SMA(5) crosses above SMA(10)
+    let entry = IndicatorRef::sma(5).crosses_above_indicator(IndicatorRef::sma(10));
 
-    // Build exit condition: SMA(20) crosses below SMA(50)
-    let exit = IndicatorRef::sma(20).crosses_below_indicator(IndicatorRef::sma(50));
+    // Build exit condition: SMA(5) crosses below SMA(10)
+    let exit = IndicatorRef::sma(5).crosses_below_indicator(IndicatorRef::sma(10));
 
     // Build the strategy using the fluent builder API
     let strategy = Strategy::builder("Golden Cross Momentum")
@@ -58,5 +60,28 @@ fn main() {
     #[cfg(not(feature = "serde"))]
     {
         println!("\nNote: Enable 'serde' feature to serialize strategy to JSON");
+    }
+
+    // Evaluate the strategy over a small candle series
+    let prices = [
+        100.0, 101.0, 103.0, 99.0, 97.0, 102.0, 105.0, 104.0, 103.0, 106.0,
+    ];
+    let candles: Vec<Candle> = prices
+        .iter()
+        .enumerate()
+        .map(|(i, p)| Candle {
+            timestamp: i as i64,
+            open: *p,
+            high: *p,
+            low: *p,
+            close: *p,
+            volume: 0.0,
+        })
+        .collect();
+
+    let signals = evaluate_strategy_batch(&strategy, &candles);
+    println!("\nSignals:");
+    for (i, signal) in signals.iter().enumerate() {
+        println!("bar {} -> {:?}", i, signal);
     }
 }
