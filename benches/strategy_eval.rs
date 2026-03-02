@@ -1,31 +1,43 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
+use mantis_ta::strategy::evaluator::evaluate_strategy_batch;
+use mantis_ta::strategy::indicator_ref::IndicatorRef;
+use mantis_ta::strategy::types::{ConditionGroup, ConditionNode, StopLoss, Strategy};
+
 mod common;
 use common::load_candles;
 
 fn bench_strategy_eval(c: &mut Criterion) {
-    let candles = load_candles("market_data/spy_daily_5y.csv");
-    c.bench_function("strategy_eval_stub", |b| {
+    // Load once; keep only 2000 bars per TODO.
+    let mut candles = load_candles("market_data/spy_daily_5y.csv");
+    if candles.len() > 2000 {
+        candles.truncate(2000);
+    }
+
+    // 5 conditions:
+    // - SMA(5) > SMA(20)
+    // - EMA(8) > EMA(21)
+    // - RSI(14) < 70
+    // - ATR(14) > 0
+    // - SMA(1) > 0 (cheap extra condition)
+    let entry = ConditionNode::Group(ConditionGroup::AllOf(vec![
+        IndicatorRef::sma(5).is_above_indicator(IndicatorRef::sma(20)),
+        IndicatorRef::ema(8).is_above_indicator(IndicatorRef::ema(21)),
+        IndicatorRef::rsi(14).is_below(70.0),
+        IndicatorRef::atr(14).is_above(0.0),
+        IndicatorRef::sma(1).is_above(0.0),
+    ]));
+
+    let strategy = Strategy::builder("bench_strategy_eval")
+        .entry(entry)
+        .stop_loss(StopLoss::FixedPercent(2.0))
+        .build()
+        .unwrap();
+
+    c.bench_function("strategy_eval_5cond_2000bars", |b| {
         b.iter(|| {
-            // Simple signal sweep: count closes above SMA(20) computed once.
-            let mut count = 0usize;
-            let mut sum = 0.0;
-            let mut window = Vec::with_capacity(20);
-            for cndl in &candles {
-                let close = cndl.close;
-                window.push(close);
-                sum += close;
-                if window.len() > 20 {
-                    sum -= window.remove(0);
-                }
-                if window.len() == 20 {
-                    let sma = sum / 20.0;
-                    if close > sma {
-                        count += 1;
-                    }
-                }
-            }
-            black_box(count)
+            let signals = evaluate_strategy_batch(black_box(&strategy), black_box(&candles));
+            black_box(signals.len())
         })
     });
 }

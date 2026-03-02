@@ -38,3 +38,6 @@ jobs:
 
       - name: Doc tests
         run: cargo test --doc
+
+      - name: Bench (report only)
+        run: cargo bench --bench strategy_eval --features strategy -- --noplot
