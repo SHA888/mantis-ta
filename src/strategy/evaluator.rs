@@ -292,6 +292,9 @@ pub fn strategy_engine(strategy: Strategy) -> StrategyEngine {
 mod tests {
     use super::*;
     use crate::strategy::indicator_ref::IndicatorRef;
+    use crate::strategy::types::{
+        CompareTarget, Condition, ConditionGroup, ConditionNode, Operator,
+    };
     use crate::strategy::StopLoss;
 
     fn make_candles(prices: &[f64]) -> Vec<Candle> {
@@ -345,7 +348,99 @@ mod tests {
         let candles = make_candles(&prices);
         let signals = evaluate_strategy_batch(&strategy, &candles);
 
-        assert_eq!(signals.len(), prices.len());
+        // Manual RSI verification: compute RSI and derive expected signals from thresholds.
+        let mut rsi = crate::indicators::RSI::new(2);
+        let mut expected = Vec::new();
+        for c in &candles {
+            let v = rsi.next(c);
+            let sig = match v {
+                Some(x) if x > 60.0 => Signal::Exit(ExitReason::RuleTriggered),
+                Some(x) if x < 40.0 => Signal::Entry(Side::Long),
+                _ => Signal::Hold,
+            };
+            expected.push(sig);
+        }
+
+        assert_eq!(signals, expected);
+
+        let entry_idx = signals.iter().position(|s| matches!(s, Signal::Entry(_)));
+        let exit_idx = signals.iter().position(|s| matches!(s, Signal::Exit(_)));
+        assert!(entry_idx.is_some(), "expected at least one entry signal");
+        assert!(exit_idx.is_some(), "expected at least one exit signal");
+        if let (Some(ei), Some(xi)) = (entry_idx, exit_idx) {
+            assert!(ei < xi, "entry should occur before exit");
+        }
+    }
+
+    #[test]
+    fn edge_single_condition_entry_only() {
+        let entry = IndicatorRef::sma(1).is_above(1.0);
+        let strategy = Strategy::builder("single")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let prices = [2.0, 2.0, 2.0];
+        let candles = make_candles(&prices);
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+
+        assert!(signals.iter().all(|s| matches!(s, Signal::Entry(_))));
+    }
+
+    #[test]
+    fn edge_max_conditions_group_all_of() {
+        let cond = || {
+            ConditionNode::Condition(Condition::new(
+                "sma1",
+                Operator::IsAbove,
+                CompareTarget::Value(1.0),
+            ))
+        };
+        let entry = ConditionNode::Group(ConditionGroup::AllOf((0..20).map(|_| cond()).collect()));
+        let strategy = Strategy::builder("max_group")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let prices = [2.0, 2.0, 2.0];
+        let candles = make_candles(&prices);
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+
+        assert!(signals.iter().all(|s| matches!(s, Signal::Entry(_))));
+    }
+
+    #[test]
+    fn edge_nested_groups() {
+        let always_true = ConditionNode::Condition(Condition::new(
+            "sma1",
+            Operator::IsAbove,
+            CompareTarget::Value(1.0),
+        ));
+        let always_false = ConditionNode::Condition(Condition::new(
+            "sma1",
+            Operator::IsAbove,
+            CompareTarget::Value(10.0),
+        ));
+
+        // Entry: sma1 > 1 AND (sma1 > 10 OR sma1 > 1)
+        let entry = ConditionNode::Group(ConditionGroup::AllOf(vec![
+            always_true.clone(),
+            ConditionNode::Group(ConditionGroup::AnyOf(vec![always_false, always_true])),
+        ]));
+
+        let strategy = Strategy::builder("nested")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let prices = [2.0, 2.0, 2.0];
+        let candles = make_candles(&prices);
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+
+        assert!(signals.iter().all(|s| matches!(s, Signal::Entry(_))));
     }
 
     #[test]
