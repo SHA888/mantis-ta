@@ -219,8 +219,8 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Benchmarks
 
-- [ ] Strategy evaluation benchmark: 5 conditions, 2000 bars (target: < 200 µs)
-- [ ] CI step: run Criterion benchmarks (report only, no gate)
+- [x] Strategy evaluation benchmark: 5 conditions, 2000 bars (target: < 200 µs)
+- [x] CI step: run Criterion benchmarks (report only, no gate)
 
 ### Documentation
 
