@@ -213,8 +213,8 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 - [x] Integration tests: builder → eval → signal accuracy (basic scenarios)
 - [x] Golden Cross strategy: verify entry/exit signals against manual calculation
-- [ ] RSI Mean Reversion strategy: verify signals at known oversold/overbought points
-- [ ] Edge cases: strategy with single condition, maximum conditions, nested groups
+- [x] RSI Mean Reversion strategy: verify signals at known oversold/overbought points
+- [x] Edge cases: strategy with single condition, maximum conditions, nested groups
 - [x] Streaming vs. batch equivalence: same candles produce same signals in both modes
 
 ### Benchmarks
