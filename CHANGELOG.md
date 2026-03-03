@@ -34,6 +34,63 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Version bump from 0.2.0 to 0.5.0 (v0.4.0 Backtesting Engine released separately)
 
+## [0.4.0] — 2026-03-01
+
+### Added
+
+#### Backtesting Engine
+- `BacktestConfig` struct (initial capital, commission, slippage, execution model, fractional shares, margin)
+- `ExecutionModel` enum (`NextBarOpen`, `CurrentBarClose`)
+- `backtest()` runner function — main execution loop with full trade simulation
+- `BrokerSim` — simulated broker with fill simulation and slippage modeling
+- `Portfolio` — portfolio state tracking, cash accounting, position sizing
+
+#### Metrics & Reporting
+- `BacktestMetrics` struct with comprehensive fields (returns, risk-adjusted metrics, drawdown, trade stats, stress metrics, exposure)
+- Metrics calculation from trade history
+- Trade log output: entry/exit timestamps, prices, P&L, exit reason, holding period
+
+#### Integrity & Safety
+- No lookahead bias: indicators see only data up to current bar
+- Next-bar execution: entries/exits fill at next bar's open (default)
+- Slippage modeling (configurable, default 0.1% equities, 0.05% forex)
+- Commission modeling (flat fee or percentage)
+- Cash accounting: cannot buy more than available cash (no hidden margin)
+- Overfitting safeguards: walk-forward validation, parameter sensitivity analysis
+
+#### Testing & Benchmarks
+- Edge case tests: strategy that never trades, strategy that's always in position
+- Full backtest benchmarks: 2yr daily, 1 instrument (target: < 5 ms), 10 instruments (target: < 50 ms)
+
+#### Documentation
+- `examples/backtest_momentum.rs` — full backtest with metrics output
+- Rustdoc for all backtest public types
+
+## [0.3.0] — 2026-02-28
+
+### Added
+
+#### Strategy Evaluation Engine
+- Batch mode: `strategy.evaluate(&candles) -> Vec<Signal>`
+- Streaming mode: `strategy.into_engine()` + `engine.next(&candle) -> Signal`
+- Condition evaluator: resolve `IndicatorRef` to computed values, apply `Operator`
+- Cross-detection state management (previous bar values for CrossesAbove/Below)
+- Warmup handling: return `Signal::Hold` until all indicators have sufficient data
+
+#### Testing
+- Integration tests: builder → eval → signal accuracy (basic scenarios)
+- Golden Cross strategy: verify entry/exit signals against manual calculation
+- RSI Mean Reversion strategy: verify signals at known oversold/overbought points
+- Edge case tests: single condition, maximum conditions, nested groups
+- Streaming vs. batch equivalence: same candles produce same signals in both modes
+
+#### Benchmarks
+- Strategy evaluation benchmark: 5 conditions, 2000 bars (target: < 200 µs)
+- CI step: run Criterion benchmarks (report only, no gate)
+
+#### Documentation
+- Updated `examples/golden_cross_strategy.rs` — now includes evaluation + signal output
+
 ## [0.2.0] — 2026-02-26
 
 ### Added
