@@ -98,6 +98,15 @@ pub struct StochasticOutput {
     pub d: f64,
 }
 
+/// ADX (Average Directional Index) output values.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AdxOutput {
+    pub plus_di: f64,
+    pub minus_di: f64,
+    pub adx: f64,
+}
+
 /// Pivot points output values.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq)]

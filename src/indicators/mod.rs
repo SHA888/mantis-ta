@@ -63,11 +63,11 @@ pub mod support_resistance;
 pub mod trend;
 pub mod volatility;
 pub mod volume;
-pub use momentum::{Stochastic, RSI};
+pub use momentum::{CCI, ROC, RSI, Stochastic, WilliamsR};
 pub use obv::OBV;
 pub use support_resistance::PivotPoints;
-pub use trend::{EMA, MACD, SMA};
-pub use volatility::{BollingerBands, ATR};
+pub use trend::{ADX, DEMA, EMA, MACD, SMA, TEMA, WMA};
+pub use volatility::{ATR, BollingerBands, StdDev};
 pub use volume::VolumeSMA;
 
 /// Core interface for all streaming technical indicators.
