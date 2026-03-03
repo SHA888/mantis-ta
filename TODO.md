@@ -279,8 +279,8 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Documentation
 
-- [ ] `examples/backtest_momentum.rs` — full backtest with metrics output
-- [ ] Rustdoc for all backtest public types
+- [x] `examples/backtest_momentum.rs` — full backtest with metrics output
+- [x] Rustdoc for all backtest public types
 
 ---
 
