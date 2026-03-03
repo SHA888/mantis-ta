@@ -235,12 +235,12 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Core Engine
 
-- [ ] `BacktestConfig` struct (initial capital, commission, slippage, execution model, fractional shares, margin)
-- [ ] `ExecutionModel` enum (NextBarOpen, CurrentBarClose)
-- [ ] `BacktestConfig::default()` implementation
-- [ ] `backtest()` runner function — main execution loop
-- [ ] `BrokerSim` — simulated broker (fills with slippage)
-- [ ] `Portfolio` — portfolio state tracking, cash accounting, position sizing
+- [x] `BacktestConfig` struct (initial capital, commission, slippage, execution model, fractional shares, margin)
+- [x] `ExecutionModel` enum (NextBarOpen, CurrentBarClose)
+- [x] `BacktestConfig::default()` implementation
+- [x] `backtest()` runner function — main execution loop
+- [x] `BrokerSim` — simulated broker (fills with slippage)
+- [x] `Portfolio` — portfolio state tracking, cash accounting, position sizing
 
 ### Metrics
 
