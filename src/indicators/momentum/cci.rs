@@ -60,10 +60,10 @@ impl CCI {
             return None;
         }
 
-        let tp_values: Vec<f64> = self.tp_window.iter().copied().collect();
-        let sma_tp = tp_values.iter().sum::<f64>() / self.period as f64;
+        let sma_tp = self.tp_window.iter().sum::<f64>() / self.period as f64;
 
-        let mean_deviation = tp_values
+        let mean_deviation = self
+            .tp_window
             .iter()
             .map(|v| (v - sma_tp).abs())
             .sum::<f64>()

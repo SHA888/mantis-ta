@@ -73,7 +73,7 @@ impl Indicator for ROC {
     }
 
     fn reset(&mut self) {
-        self.window = RingBuf::new(self.period + 1, 0.0);
+        self.window = RingBuf::new(self.period, 0.0);
     }
 
     fn warmup_period(&self) -> usize {
