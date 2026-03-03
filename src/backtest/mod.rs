@@ -768,9 +768,9 @@ fn backtest_once(
             trades.len()
         ));
     }
-    if condition_count > 7 {
+    if condition_count >= 7 {
         warnings.push(format!(
-            "Excessive condition warning: {} conditions (> 7) — potential overfitting",
+            "Excessive condition warning: {} conditions (>= 7) — potential overfitting",
             condition_count
         ));
     }
@@ -792,28 +792,47 @@ pub fn backtest(
     candles: &[Candle],
     config: BacktestConfig,
 ) -> Result<BacktestResult> {
-    let base = backtest_once(&strategy, candles, config)?;
+    let mut base = backtest_once(&strategy, candles, config)?;
 
-    // Parameter sensitivity: scale commission_pct and slippage_pct by factors
+    // Parameter sensitivity: scale commission_pct and slippage_pct by ±10%
+    // Include base (factor=1.0) in sensitivity array
     let factors = [0.9, 1.0, 1.1];
     let mut sensitivity = Vec::new();
     for factor in factors {
         let mut cfg = config;
         cfg.commission_pct *= factor;
         cfg.slippage_pct *= factor;
-        if let Ok(res) = backtest_once(&strategy, candles, cfg) {
-            sensitivity.push(ParameterSensitivity {
-                factor,
-                commission_pct: cfg.commission_pct,
-                slippage_pct: cfg.slippage_pct,
-                metrics: res.metrics,
-            });
+        
+        // Validate scaled config stays within bounds
+        if cfg.commission_pct > 1.0 || cfg.slippage_pct > 1.0 {
+            base.warnings.push(format!(
+                "Sensitivity analysis skipped factor {}: scaled parameters exceed valid range",
+                factor
+            ));
+            continue;
+        }
+        
+        match backtest_once(&strategy, candles, cfg) {
+            Ok(res) => {
+                sensitivity.push(ParameterSensitivity {
+                    factor,
+                    commission_pct: cfg.commission_pct,
+                    slippage_pct: cfg.slippage_pct,
+                    metrics: res.metrics,
+                });
+            }
+            Err(e) => {
+                base.warnings.push(format!(
+                    "Sensitivity analysis failed for factor {}: {}",
+                    factor, e
+                ));
+            }
         }
     }
 
     // Walk-forward: 70/30 split (time-ordered)
     let split_index = ((candles.len() as f64) * 0.7).floor() as usize;
-    let walk_forward = if split_index >= 2 && split_index + 2 <= candles.len() {
+    let walk_forward = if split_index >= 2 && candles.len() - split_index >= 2 {
         let train = &candles[..split_index];
         let test = &candles[split_index..];
         match (backtest_once(&strategy, train, config), backtest_once(&strategy, test, config)) {
@@ -822,9 +841,15 @@ pub fn backtest(
                 train_metrics: train_res.metrics,
                 test_metrics: test_res.metrics,
             }),
-            _ => None,
+            (Err(e), _) | (_, Err(e)) => {
+                base.warnings.push(format!("Walk-forward validation failed: {}", e));
+                None
+            }
         }
     } else {
+        base.warnings.push(
+            "Walk-forward validation skipped: insufficient data for 70/30 split (need >= 4 candles with 2+ in each split)".to_string()
+        );
         None
     };
 
