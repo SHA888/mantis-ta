@@ -69,8 +69,8 @@ impl CCI {
             .sum::<f64>()
             / self.period as f64;
 
-        if mean_deviation == 0.0 {
-            Some(0.0)
+        if mean_deviation.abs() < 1e-10 {
+            None
         } else {
             Some((typical_price - sma_tp) / (0.015 * mean_deviation))
         }

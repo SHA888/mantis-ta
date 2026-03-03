@@ -27,7 +27,7 @@ use crate::utils::ringbuf::RingBuf;
 ///
 /// let values = ROC::new(2).calculate(&candles);
 /// assert_eq!(values[0], None);
-/// assert_eq!(values[1], None);
+/// assert!(values[1].is_some());
 /// assert!(values[2].is_some());
 /// assert!(values[3].is_some());
 /// ```
@@ -42,7 +42,7 @@ impl ROC {
         assert!(period > 0, "period must be > 0");
         Self {
             period,
-            window: RingBuf::new(period + 1, 0.0),
+            window: RingBuf::new(period, 0.0),
         }
     }
 
@@ -50,14 +50,14 @@ impl ROC {
     fn update(&mut self, value: f64) -> Option<f64> {
         self.window.push(value);
 
-        if self.window.len() <= self.period {
+        if self.window.len() < self.period {
             return None;
         }
 
         let current = value;
-        let past = self.window.iter().nth(0).copied().unwrap_or(0.0);
+        let past = self.window.iter().next().copied().unwrap_or(0.0);
 
-        if past != 0.0 {
+        if past.abs() > 1e-10 {
             Some(((current - past) / past) * 100.0)
         } else {
             None
@@ -110,12 +110,14 @@ mod tests {
         }
 
         assert_eq!(outputs[0], None);
-        assert_eq!(outputs[1], None);
-        // ROC(2) at 104: ((104 - 100) / 100) * 100 = 4.0
+        // ROC(2) at 102: ((102 - 100) / 100) * 100 = 2.0
+        assert!(outputs[1].is_some());
+        assert!((outputs[1].unwrap() - 2.0).abs() < 0.0001);
+        // ROC(2) at 104: ((104 - 102) / 102) * 100 ≈ 1.961
         assert!(outputs[2].is_some());
-        assert!((outputs[2].unwrap() - 4.0).abs() < 0.0001);
-        // ROC(2) at 106: ((106 - 102) / 102) * 100 ≈ 3.922
+        assert!((outputs[2].unwrap() - 1.961).abs() < 0.01);
+        // ROC(2) at 106: ((106 - 104) / 104) * 100 ≈ 1.923
         assert!(outputs[3].is_some());
-        assert!((outputs[3].unwrap() - 3.922).abs() < 0.01);
+        assert!((outputs[3].unwrap() - 1.923).abs() < 0.01);
     }
 }
