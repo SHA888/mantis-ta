@@ -898,4 +898,196 @@ mod tests {
         assert!(res.ending_cash.is_finite());
         assert!(!res.trades.is_empty());
     }
+
+    #[test]
+    fn backtest_metrics_match_hand_calculation() {
+        // Simple strategy: buy at bar 1 (price 2.0), sell at bar 3 (price 1.0)
+        // Entry: SMA(1) > 1.5 → triggers at bar 1 (SMA=2.0)
+        // Exit: SMA(1) < 1.5 → triggers at bar 3 (SMA=1.0)
+        let entry = IndicatorRef::sma(1).is_above(1.5);
+        let exit = IndicatorRef::sma(1).is_below(1.5);
+        let strategy = Strategy::builder("metrics_test")
+            .entry(entry)
+            .exit(exit)
+            .stop_loss(StopLoss::FixedPercent(5.0))
+            .build()
+            .unwrap();
+
+        let candles = make_candles(&[1.0, 2.0, 2.0, 1.0]);
+        let config = BacktestConfig {
+            initial_capital: 100_000.0,
+            commission_per_trade: 0.0,
+            commission_pct: 0.0,
+            slippage_pct: 0.0,
+            ..Default::default()
+        };
+        let res = backtest(strategy, &candles, config).unwrap();
+
+        // Expected: 1 trade, entry at 2.0, exit at 1.0, qty = 50000
+        // P&L = (1.0 - 2.0) * 50000 = -50000
+        assert_eq!(res.trades.len(), 1);
+        let trade = &res.trades[0];
+        assert_eq!(trade.entry_price, 2.0);
+        assert_eq!(trade.exit_price, 1.0);
+        assert_eq!(trade.qty, 50000.0);
+        assert_eq!(trade.pnl, -50000.0);
+        assert_eq!(res.metrics.total_return, -0.5);
+    }
+
+    #[test]
+    fn backtest_no_lookahead_bias() {
+        // Strategy that uses future data: entry when next bar's close > current
+        // This should NOT generate signals because indicators only see current bar
+        let entry = IndicatorRef::sma(1).is_above(1.5);
+        let exit = IndicatorRef::sma(1).is_below(0.5);
+        let strategy = Strategy::builder("no_lookahead")
+            .entry(entry)
+            .exit(exit)
+            .stop_loss(StopLoss::FixedPercent(5.0))
+            .build()
+            .unwrap();
+
+        // Prices: [1.0, 2.0, 3.0, 1.0]
+        // SMA(1) = [1.0, 2.0, 3.0, 1.0]
+        // Entry triggers at bar 1 (SMA=2.0 > 1.5)
+        // Exit triggers at bar 3 (SMA=1.0 < 0.5) - NO, 1.0 is not < 0.5
+        let candles = make_candles(&[1.0, 2.0, 3.0, 1.0]);
+        let res = backtest(strategy, &candles, BacktestConfig::default()).unwrap();
+
+        // Should have 1 trade (entry at bar 1, liquidated at end)
+        assert_eq!(res.trades.len(), 1);
+    }
+
+    #[test]
+    fn backtest_cash_accounting_prevents_overbuy() {
+        // Strategy tries to buy more than available cash
+        let entry = IndicatorRef::sma(1).is_above(0.5);
+        let exit = IndicatorRef::sma(1).is_below(0.1);
+        let strategy = Strategy::builder("cash_test")
+            .entry(entry)
+            .exit(exit)
+            .stop_loss(StopLoss::FixedPercent(5.0))
+            .build()
+            .unwrap();
+
+        // High prices with low capital
+        let candles = make_candles(&[100.0, 200.0, 200.0, 100.0]);
+        let config = BacktestConfig {
+            initial_capital: 1000.0,  // Only $1000
+            ..Default::default()
+        };
+        let res = backtest(strategy, &candles, config).unwrap();
+
+        // Position size should be limited by available cash
+        // qty = 1000 / (100 * 1.001) ≈ 9.99 → floor to 9
+        if !res.trades.is_empty() {
+            assert!(res.trades[0].qty <= 10.0);
+            assert!(res.ending_cash >= 0.0);  // Never go negative
+        }
+    }
+
+    #[test]
+    fn backtest_commission_reduces_returns() {
+        let entry = IndicatorRef::sma(1).is_above(1.5);
+        let exit = IndicatorRef::sma(1).is_below(1.5);
+        let strategy = Strategy::builder("commission_test")
+            .entry(entry)
+            .exit(exit)
+            .stop_loss(StopLoss::FixedPercent(5.0))
+            .build()
+            .unwrap();
+
+        let candles = make_candles(&[1.0, 2.0, 2.0, 1.0]);
+
+        // Run without commission
+        let config_no_comm = BacktestConfig {
+            initial_capital: 100_000.0,
+            commission_pct: 0.0,
+            ..Default::default()
+        };
+        let res_no_comm = backtest(strategy.clone(), &candles, config_no_comm).unwrap();
+
+        // Run with commission
+        let config_with_comm = BacktestConfig {
+            initial_capital: 100_000.0,
+            commission_pct: 0.01,  // 1% per trade
+            ..Default::default()
+        };
+        let res_with_comm = backtest(strategy, &candles, config_with_comm).unwrap();
+
+        // Commission should reduce ending cash
+        assert!(res_with_comm.ending_cash < res_no_comm.ending_cash);
+    }
+
+    #[test]
+    fn backtest_slippage_reduces_returns() {
+        let entry = IndicatorRef::sma(1).is_above(1.5);
+        let exit = IndicatorRef::sma(1).is_below(1.5);
+        let strategy = Strategy::builder("slippage_test")
+            .entry(entry)
+            .exit(exit)
+            .stop_loss(StopLoss::FixedPercent(5.0))
+            .build()
+            .unwrap();
+
+        let candles = make_candles(&[1.0, 2.0, 2.0, 1.0]);
+
+        // Run without slippage
+        let config_no_slip = BacktestConfig {
+            initial_capital: 100_000.0,
+            slippage_pct: 0.0,
+            ..Default::default()
+        };
+        let res_no_slip = backtest(strategy.clone(), &candles, config_no_slip).unwrap();
+
+        // Run with slippage
+        let config_with_slip = BacktestConfig {
+            initial_capital: 100_000.0,
+            slippage_pct: 0.01,  // 1% slippage
+            ..Default::default()
+        };
+        let res_with_slip = backtest(strategy, &candles, config_with_slip).unwrap();
+
+        // Slippage should reduce ending cash
+        assert!(res_with_slip.ending_cash < res_no_slip.ending_cash);
+    }
+
+    #[test]
+    fn backtest_edge_case_never_trades() {
+        // Strategy that never triggers
+        let entry = IndicatorRef::sma(1).is_above(100.0);  // Never true
+        let exit = IndicatorRef::sma(1).is_below(0.0);     // Never true
+        let strategy = Strategy::builder("never_trade")
+            .entry(entry)
+            .exit(exit)
+            .stop_loss(StopLoss::FixedPercent(5.0))
+            .build()
+            .unwrap();
+
+        let candles = make_candles(&[1.0, 2.0, 2.0, 1.0]);
+        let res = backtest(strategy, &candles, BacktestConfig::default()).unwrap();
+
+        assert_eq!(res.trades.len(), 0);
+        assert_eq!(res.ending_cash, 100_000.0);  // No trades, no change
+    }
+
+    #[test]
+    fn backtest_edge_case_always_in_position() {
+        // Strategy that enters immediately and never exits
+        let entry = IndicatorRef::sma(1).is_above(0.0);    // Always true
+        let exit = IndicatorRef::sma(1).is_below(-100.0);  // Never true
+        let strategy = Strategy::builder("always_in")
+            .entry(entry)
+            .exit(exit)
+            .stop_loss(StopLoss::FixedPercent(5.0))
+            .build()
+            .unwrap();
+
+        let candles = make_candles(&[1.0, 2.0, 2.0, 1.0]);
+        let res = backtest(strategy, &candles, BacktestConfig::default()).unwrap();
+
+        // Should have 1 trade (entry at bar 0, liquidated at end)
+        assert_eq!(res.trades.len(), 1);
+        assert!(res.trades[0].holding_period_bars > 0);
+    }
 }

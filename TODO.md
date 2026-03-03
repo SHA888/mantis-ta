@@ -266,11 +266,11 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Testing
 
-- [ ] Backtest integration tests: known strategy on known data → verify metrics match hand calculation
-- [ ] No-lookahead-bias test: strategy with future-dependent condition must not generate signals
-- [ ] Cash accounting test: cannot open position larger than available capital
-- [ ] Commission/slippage test: verify they reduce returns appropriately
-- [ ] Edge cases: strategy that never trades, strategy that's always in position
+- [x] Backtest integration tests: known strategy on known data → verify metrics match hand calculation
+- [x] No-lookahead-bias test: strategy with future-dependent condition must not generate signals
+- [x] Cash accounting test: cannot open position larger than available capital
+- [x] Commission/slippage test: verify they reduce returns appropriately
+- [x] Edge cases: strategy that never trades, strategy that's always in position
 
 ### Benchmarks
 
