@@ -18,10 +18,20 @@ use crate::types::{Candle, ExitReason, MantisError, Result, Side, Signal};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+/// Execution model for order fills in backtesting.
+///
+/// Determines when pending orders are filled relative to the current candle.
+///
+/// # Variants
+///
+/// * `NextBarOpen` - Orders fill at the next bar's open price (default, more realistic)
+/// * `CurrentBarClose` - Orders fill at the current bar's close price (less realistic, for testing)
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ExecutionModel {
+    /// Fill orders at the next bar's open price
     NextBarOpen,
+    /// Fill orders at the current bar's close price
     CurrentBarClose,
 }
 
@@ -197,15 +207,36 @@ fn compute_metrics(
     }
 }
 
+/// Configuration for backtest execution.
+///
+/// Defines initial capital, trading costs (commission and slippage), execution model,
+/// and other parameters that affect backtest behavior.
+///
+/// # Fields
+///
+/// * `initial_capital` - Starting cash in dollars (must be > 0)
+/// * `commission_per_trade` - Fixed commission per trade in dollars (default: 0)
+/// * `commission_pct` - Percentage commission per trade as decimal (default: 0.001 = 0.1%)
+/// * `slippage_pct` - Slippage as percentage of notional (default: 0.001 = 0.1%)
+/// * `execution` - Order fill model: NextBarOpen or CurrentBarClose (default: NextBarOpen)
+/// * `fractional_shares` - Allow fractional share quantities (default: false)
+/// * `margin_requirement` - Margin requirement multiplier (MVP only supports 1.0)
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BacktestConfig {
+    /// Starting capital in dollars
     pub initial_capital: f64,
+    /// Fixed commission per trade in dollars
     pub commission_per_trade: f64,
+    /// Percentage commission per trade (0.0-1.0)
     pub commission_pct: f64,
+    /// Slippage as percentage of notional (0.0-1.0)
     pub slippage_pct: f64,
+    /// Order execution model
     pub execution: ExecutionModel,
+    /// Allow fractional share quantities
     pub fractional_shares: bool,
+    /// Margin requirement multiplier (MVP: 1.0 only)
     pub margin_requirement: f64,
 }
 
@@ -268,63 +299,117 @@ impl BacktestConfig {
     }
 }
 
+/// A completed trade with entry/exit details and P&L.
+///
+/// Records all information about a single round-trip trade from entry to exit,
+/// including timestamps, prices, quantity, profit/loss, and exit reason.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Trade {
+    /// Timestamp when position was entered (milliseconds)
     pub entry_timestamp: i64,
+    /// Timestamp when position was exited (milliseconds)
     pub exit_timestamp: i64,
+    /// Price at which position was entered
     pub entry_price: f64,
+    /// Price at which position was exited
     pub exit_price: f64,
+    /// Quantity of shares/contracts
     pub qty: f64,
+    /// Profit/loss in dollars
     pub pnl: f64,
+    /// Reason for exit (RuleTriggered, StopLoss, TakeProfit, etc.)
     pub exit_reason: ExitReason,
+    /// Number of bars held
     pub holding_period_bars: usize,
 }
 
+/// Complete backtest results including metrics, trades, and diagnostics.
+///
+/// Contains all output from a backtest run: final capital, equity curve,
+/// performance metrics, trade history, warnings, and sensitivity analysis.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct BacktestResult {
+    /// Starting capital in dollars
     pub starting_cash: f64,
+    /// Ending capital in dollars
     pub ending_cash: f64,
+    /// Equity curve: (timestamp, equity) pairs
     pub equity_curve: Vec<(i64, f64)>,
+    /// Performance metrics
     pub metrics: BacktestMetrics,
+    /// All completed trades
     pub trades: Vec<Trade>,
+    /// Warnings (low trade count, excessive conditions, etc.)
     pub warnings: Vec<String>,
+    /// Parameter sensitivity analysis results
     pub sensitivity: Vec<ParameterSensitivity>,
+    /// Walk-forward validation results (70/30 split)
     pub walk_forward: Option<WalkForwardResult>,
 }
 
+/// Performance metrics computed from backtest results.
+///
+/// Comprehensive set of metrics including returns, risk-adjusted returns,
+/// drawdown, trade statistics, and exposure ratios.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct BacktestMetrics {
+    /// Total return as decimal (e.g., 0.25 = 25%)
     pub total_return: f64,
+    /// Compound annual growth rate (if >= 1 year of data)
     pub cagr: Option<f64>,
+    /// Annualized volatility of returns
     pub annualized_vol: Option<f64>,
+    /// Sharpe ratio (assuming 0% risk-free rate)
     pub sharpe_ratio: Option<f64>,
+    /// Maximum drawdown in dollars
     pub max_drawdown: f64,
+    /// Maximum drawdown as percentage
     pub max_drawdown_pct: f64,
+    /// Win rate: winning trades / total trades
     pub win_rate: Option<f64>,
+    /// Profit factor: sum of wins / sum of losses
     pub profit_factor: Option<f64>,
+    /// Average profit per winning trade
     pub average_win: Option<f64>,
+    /// Average loss per losing trade
     pub average_loss: Option<f64>,
+    /// Total number of completed trades
     pub total_trades: usize,
+    /// Exposure ratio: time in market / total duration
     pub exposure_ratio: Option<f64>,
 }
 
+/// Parameter sensitivity analysis for a single factor.
+///
+/// Shows how metrics change when commission and slippage are scaled by a factor.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct ParameterSensitivity {
+    /// Scaling factor (0.9, 1.0, 1.1 for ±10%)
     pub factor: f64,
+    /// Scaled commission percentage
     pub commission_pct: f64,
+    /// Scaled slippage percentage
     pub slippage_pct: f64,
+    /// Metrics for this parameter set
     pub metrics: BacktestMetrics,
 }
 
+/// Walk-forward validation results (70/30 time split).
+///
+/// Compares in-sample (training) metrics to out-of-sample (test) metrics
+/// to detect overfitting. Degradation indicates the strategy may not generalize.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct WalkForwardResult {
+    /// Index where train/test split occurs
     pub split_index: usize,
+    /// Metrics on training set (first 70% of data)
     pub train_metrics: BacktestMetrics,
+    /// Metrics on test set (last 30% of data)
     pub test_metrics: BacktestMetrics,
 }
 
