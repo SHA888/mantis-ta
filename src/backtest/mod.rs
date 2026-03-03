@@ -290,6 +290,8 @@ pub struct BacktestResult {
     pub metrics: BacktestMetrics,
     pub trades: Vec<Trade>,
     pub warnings: Vec<String>,
+    pub sensitivity: Vec<ParameterSensitivity>,
+    pub walk_forward: Option<WalkForwardResult>,
 }
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -307,6 +309,23 @@ pub struct BacktestMetrics {
     pub average_loss: Option<f64>,
     pub total_trades: usize,
     pub exposure_ratio: Option<f64>,
+}
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ParameterSensitivity {
+    pub factor: f64,
+    pub commission_pct: f64,
+    pub slippage_pct: f64,
+    pub metrics: BacktestMetrics,
+}
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct WalkForwardResult {
+    pub split_index: usize,
+    pub train_metrics: BacktestMetrics,
+    pub test_metrics: BacktestMetrics,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -551,8 +570,8 @@ fn validate_candles(candles: &[Candle]) -> Result<()> {
     Ok(())
 }
 
-pub fn backtest(
-    strategy: Strategy,
+fn backtest_once(
+    strategy: &Strategy,
     candles: &[Candle],
     config: BacktestConfig,
 ) -> Result<BacktestResult> {
@@ -573,7 +592,7 @@ pub fn backtest(
 
     let mut portfolio = Portfolio::new(config.initial_capital)?;
     let broker = BrokerSim::new();
-    let mut engine = strategy_engine(strategy);
+    let mut engine = strategy_engine(strategy.clone());
     let mut trades: Vec<Trade> = Vec::new();
     let mut equity_curve: Vec<(i64, f64)> = Vec::with_capacity(candles.len() + 1);
     // Seed equity curve with starting cash at first candle timestamp
@@ -763,6 +782,56 @@ pub fn backtest(
         equity_curve,
         trades,
         warnings,
+        sensitivity: Vec::new(),
+        walk_forward: None,
+    })
+}
+
+pub fn backtest(
+    strategy: Strategy,
+    candles: &[Candle],
+    config: BacktestConfig,
+) -> Result<BacktestResult> {
+    let base = backtest_once(&strategy, candles, config)?;
+
+    // Parameter sensitivity: scale commission_pct and slippage_pct by factors
+    let factors = [0.9, 1.0, 1.1];
+    let mut sensitivity = Vec::new();
+    for factor in factors {
+        let mut cfg = config;
+        cfg.commission_pct *= factor;
+        cfg.slippage_pct *= factor;
+        if let Ok(res) = backtest_once(&strategy, candles, cfg) {
+            sensitivity.push(ParameterSensitivity {
+                factor,
+                commission_pct: cfg.commission_pct,
+                slippage_pct: cfg.slippage_pct,
+                metrics: res.metrics,
+            });
+        }
+    }
+
+    // Walk-forward: 70/30 split (time-ordered)
+    let split_index = ((candles.len() as f64) * 0.7).floor() as usize;
+    let walk_forward = if split_index >= 2 && split_index + 2 <= candles.len() {
+        let train = &candles[..split_index];
+        let test = &candles[split_index..];
+        match (backtest_once(&strategy, train, config), backtest_once(&strategy, test, config)) {
+            (Ok(train_res), Ok(test_res)) => Some(WalkForwardResult {
+                split_index,
+                train_metrics: train_res.metrics,
+                test_metrics: test_res.metrics,
+            }),
+            _ => None,
+        }
+    } else {
+        None
+    };
+
+    Ok(BacktestResult {
+        sensitivity,
+        walk_forward,
+        ..base
     })
 }
 
