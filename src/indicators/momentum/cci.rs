@@ -149,4 +149,66 @@ mod tests {
         assert!(outputs[2].is_some());
         assert!(outputs[3].is_some());
     }
+
+    #[test]
+    fn cci_reset_clears_state() {
+        let mut cci = CCI::new(3);
+        let candles = vec![
+            Candle {
+                timestamp: 0,
+                open: 100.0,
+                high: 102.0,
+                low: 99.0,
+                close: 100.0,
+                volume: 0.0,
+            },
+            Candle {
+                timestamp: 1,
+                open: 101.0,
+                high: 103.0,
+                low: 100.0,
+                close: 101.0,
+                volume: 0.0,
+            },
+            Candle {
+                timestamp: 2,
+                open: 102.0,
+                high: 104.0,
+                low: 101.0,
+                close: 102.0,
+                volume: 0.0,
+            },
+        ];
+
+        for c in &candles {
+            cci.next(c);
+        }
+        assert!(cci.next(&candles[0]).is_some());
+
+        cci.reset();
+        assert_eq!(cci.next(&candles[0]), None);
+    }
+
+    #[test]
+    fn cci_with_flat_market() {
+        let mut cci = CCI::new(3);
+        let candle = Candle {
+            timestamp: 0,
+            open: 100.0,
+            high: 100.0,
+            low: 100.0,
+            close: 100.0,
+            volume: 0.0,
+        };
+
+        cci.next(&candle);
+        cci.next(&candle);
+        assert_eq!(cci.next(&candle), None);
+    }
+
+    #[test]
+    fn cci_warmup_period() {
+        let cci = CCI::new(5);
+        assert_eq!(cci.warmup_period(), 5);
+    }
 }

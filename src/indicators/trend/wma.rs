@@ -120,4 +120,52 @@ mod tests {
         assert!((wma_val - 2.333333).abs() < 0.0001);
         assert!(outputs[3].is_some());
     }
+
+    #[test]
+    fn wma_reset_clears_state() {
+        let mut wma = WMA::new(3);
+        let candle = Candle {
+            timestamp: 0,
+            open: 1.0,
+            high: 1.0,
+            low: 1.0,
+            close: 1.0,
+            volume: 0.0,
+        };
+
+        wma.next(&candle);
+        wma.next(&candle);
+        wma.next(&candle);
+        assert!(wma.next(&candle).is_some());
+
+        wma.reset();
+        assert_eq!(wma.next(&candle), None);
+    }
+
+    #[test]
+    fn wma_with_constant_values() {
+        let mut wma = WMA::new(2);
+        let candles = [5.0, 5.0, 5.0]
+            .iter()
+            .map(|c| Candle {
+                timestamp: 0,
+                open: *c,
+                high: *c,
+                low: *c,
+                close: *c,
+                volume: 0.0,
+            })
+            .collect::<Vec<_>>();
+
+        let outputs: Vec<_> = candles.iter().map(|c| wma.next(c)).collect();
+        assert_eq!(outputs[0], None);
+        assert_eq!(outputs[1], Some(5.0));
+        assert_eq!(outputs[2], Some(5.0));
+    }
+
+    #[test]
+    fn wma_warmup_period() {
+        let wma = WMA::new(5);
+        assert_eq!(wma.warmup_period(), 5);
+    }
 }

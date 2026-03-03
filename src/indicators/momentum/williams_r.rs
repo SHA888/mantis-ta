@@ -150,4 +150,60 @@ mod tests {
         // %R = ((104 - 102) / (104 - 99)) * -100 = (2/5) * -100 = -40
         assert!((outputs[2].unwrap() - (-40.0)).abs() < 0.01);
     }
+
+    #[test]
+    fn williams_r_reset_clears_state() {
+        let mut wr = WilliamsR::new(3);
+        let candle = Candle {
+            timestamp: 0,
+            open: 100.0,
+            high: 102.0,
+            low: 99.0,
+            close: 100.0,
+            volume: 0.0,
+        };
+
+        wr.next(&candle);
+        wr.next(&candle);
+        wr.next(&candle);
+        assert!(wr.next(&candle).is_some());
+
+        wr.reset();
+        assert_eq!(wr.next(&candle), None);
+    }
+
+    #[test]
+    fn williams_r_at_high() {
+        let mut wr = WilliamsR::new(2);
+        let candles = vec![
+            Candle {
+                timestamp: 0,
+                open: 100.0,
+                high: 100.0,
+                low: 100.0,
+                close: 100.0,
+                volume: 0.0,
+            },
+            Candle {
+                timestamp: 1,
+                open: 105.0,
+                high: 105.0,
+                low: 100.0,
+                close: 105.0,
+                volume: 0.0,
+            },
+        ];
+
+        let outputs: Vec<_> = candles.iter().map(|c| wr.next(c)).collect();
+        assert_eq!(outputs[0], None);
+        // At bar 1: highest=105, lowest=100, close=105
+        // %R = ((105 - 105) / (105 - 100)) * -100 = 0
+        assert_eq!(outputs[1], Some(0.0));
+    }
+
+    #[test]
+    fn williams_r_warmup_period() {
+        let wr = WilliamsR::new(5);
+        assert_eq!(wr.warmup_period(), 5);
+    }
 }

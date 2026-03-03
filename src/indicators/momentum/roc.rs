@@ -120,4 +120,55 @@ mod tests {
         assert!(outputs[3].is_some());
         assert!((outputs[3].unwrap() - 1.923).abs() < 0.01);
     }
+
+    #[test]
+    fn roc_reset_clears_state() {
+        let mut roc = ROC::new(2);
+        let candle = Candle {
+            timestamp: 0,
+            open: 100.0,
+            high: 100.0,
+            low: 100.0,
+            close: 100.0,
+            volume: 0.0,
+        };
+
+        roc.next(&candle);
+        roc.next(&candle);
+        assert!(roc.next(&candle).is_some());
+
+        roc.reset();
+        assert_eq!(roc.next(&candle), None);
+    }
+
+    #[test]
+    fn roc_with_negative_change() {
+        let mut roc = ROC::new(2);
+        let candles = [100.0, 95.0, 90.0]
+            .iter()
+            .map(|c| Candle {
+                timestamp: 0,
+                open: *c,
+                high: *c,
+                low: *c,
+                close: *c,
+                volume: 0.0,
+            })
+            .collect::<Vec<_>>();
+
+        let outputs: Vec<_> = candles.iter().map(|c| roc.next(c)).collect();
+        assert_eq!(outputs[0], None);
+        // ROC(2) at 95: ((95 - 100) / 100) * 100 = -5.0
+        assert!(outputs[1].is_some());
+        assert!((outputs[1].unwrap() - (-5.0)).abs() < 0.0001);
+        // ROC(2) at 90: ((90 - 95) / 95) * 100 ≈ -5.263
+        assert!(outputs[2].is_some());
+        assert!((outputs[2].unwrap() - (-5.263)).abs() < 0.01);
+    }
+
+    #[test]
+    fn roc_warmup_period() {
+        let roc = ROC::new(5);
+        assert_eq!(roc.warmup_period(), 5);
+    }
 }
