@@ -259,8 +259,8 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Overfitting Safeguards
 
-- [ ] Minimum trade count warning (< 30 trades = statistically unreliable)
-- [ ] Excessive condition warning (> 6–7 conditions = potential overfitting)
+- [x] Minimum trade count warning (< 30 trades = statistically unreliable)
+- [x] Excessive condition warning (> 6–7 conditions = potential overfitting)
 - [ ] Parameter sensitivity report (±10% parameter variation impact)
 - [ ] Walk-forward validation utility (in-sample + out-of-sample split, report both)
 
