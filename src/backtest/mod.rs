@@ -14,6 +14,7 @@
 use crate::strategy::evaluator::strategy_engine;
 use crate::strategy::types::Strategy;
 use crate::types::{Candle, ExitReason, MantisError, Result, Side, Signal};
+use std::f64::INFINITY;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -23,6 +24,158 @@ use serde::{Deserialize, Serialize};
 pub enum ExecutionModel {
     NextBarOpen,
     CurrentBarClose,
+}
+
+fn equity_value(cash: f64, position_qty: f64, mark_price: f64) -> f64 {
+    cash + position_qty * mark_price
+}
+
+fn compute_metrics(
+    trades: &[Trade],
+    equity_curve: &[(i64, f64)],
+    starting_cash: f64,
+) -> BacktestMetrics {
+    let total_return = if starting_cash > 0.0 {
+        equity_curve
+            .last()
+            .map(|(_, eq)| eq / starting_cash - 1.0)
+            .unwrap_or(0.0)
+    } else {
+        0.0
+    };
+
+    // Per-bar returns for volatility and Sharpe
+    let mut per_bar_returns: Vec<f64> = Vec::new();
+    for w in equity_curve.windows(2) {
+        let prev = w[0].1;
+        let next = w[1].1;
+        if prev > 0.0 {
+            per_bar_returns.push(next / prev - 1.0);
+        }
+    }
+
+    let bars = per_bar_returns.len() as f64;
+    let bars_per_year: f64 = 252.0; // assumption for daily-like data
+    let mean_ret = if bars > 0.0 {
+        per_bar_returns.iter().sum::<f64>() / bars
+    } else {
+        0.0
+    };
+    let var = if bars > 1.0 {
+        per_bar_returns
+            .iter()
+            .map(|r| {
+                let diff = r - mean_ret;
+                diff * diff
+            })
+            .sum::<f64>()
+            / (bars - 1.0)
+    } else {
+        0.0
+    };
+    let vol = var.sqrt();
+    let annualized_vol = if vol.is_finite() && bars > 0.0 {
+        Some(vol * bars_per_year.sqrt())
+    } else {
+        None
+    };
+    let sharpe_ratio = if vol > 0.0 {
+        Some(mean_ret / vol * bars_per_year.sqrt())
+    } else {
+        None
+    };
+
+    // CAGR based on timestamps if available
+    let cagr = if equity_curve.len() >= 2 {
+        let start_ts = equity_curve.first().unwrap().0 as f64 / 1000.0; // seconds
+        let end_ts = equity_curve.last().unwrap().0 as f64 / 1000.0;
+        let duration_years = (end_ts - start_ts) / (365.0 * 24.0 * 3600.0);
+        if duration_years > 0.0 && starting_cash > 0.0 {
+            let ending = equity_curve.last().unwrap().1;
+            let ratio = ending / starting_cash;
+            Some(ratio.powf(1.0 / duration_years) - 1.0)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    // Drawdown
+    let mut peak = f64::MIN;
+    let mut max_dd = 0.0;
+    for &(_, eq) in equity_curve {
+        if eq > peak {
+            peak = eq;
+        }
+        if peak > 0.0 {
+            let dd = (peak - eq).max(0.0);
+            if dd > max_dd {
+                max_dd = dd;
+            }
+        }
+    }
+    let max_drawdown_pct = if peak > 0.0 { max_dd / peak } else { 0.0 };
+
+    // Trade stats
+    let total_trades = trades.len();
+    let mut wins = 0usize;
+    let mut losses = 0usize;
+    let mut win_sum = 0.0;
+    let mut loss_sum = 0.0;
+    for t in trades {
+        if t.pnl > 0.0 {
+            wins += 1;
+            win_sum += t.pnl;
+        } else if t.pnl < 0.0 {
+            losses += 1;
+            loss_sum += t.pnl.abs();
+        }
+    }
+    let win_rate = if total_trades > 0 {
+        Some(wins as f64 / total_trades as f64)
+    } else {
+        None
+    };
+    let profit_factor = match (win_sum, loss_sum) {
+        (_, 0.0) if wins > 0 => Some(INFINITY),
+        (ws, ls) if ls > 0.0 => Some(ws / ls),
+        _ => None,
+    };
+    let average_win = if wins > 0 {
+        Some(win_sum / wins as f64)
+    } else {
+        None
+    };
+    let average_loss = if losses > 0 {
+        Some(-(loss_sum / losses as f64))
+    } else {
+        None
+    };
+
+    // Exposure: time in market divided by total bars
+    let total_bars = equity_curve.len().saturating_sub(1); // edges
+    let holding_bars: usize = trades.iter().map(|t| t.holding_period_bars).sum();
+    let exposure_ratio = if total_bars > 0 {
+        Some(holding_bars as f64 / total_bars as f64)
+    } else {
+        None
+    };
+
+    BacktestMetrics {
+        total_return,
+        cagr,
+        annualized_vol,
+        sharpe_ratio,
+        max_drawdown: max_dd,
+        max_drawdown_pct,
+        win_rate,
+        profit_factor,
+        average_win,
+        average_loss,
+        total_trades,
+        exposure_ratio,
+    }
 }
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -43,7 +196,7 @@ impl Default for BacktestConfig {
             initial_capital: 100_000.0,
             commission_per_trade: 0.0,
             commission_pct: 0.001,
-            slippage_pct: 0.0005,
+            slippage_pct: 0.001,
             execution: ExecutionModel::NextBarOpen,
             fractional_shares: false,
             margin_requirement: 1.0,
@@ -114,7 +267,26 @@ pub struct Trade {
 pub struct BacktestResult {
     pub starting_cash: f64,
     pub ending_cash: f64,
+    pub equity_curve: Vec<(i64, f64)>,
+    pub metrics: BacktestMetrics,
     pub trades: Vec<Trade>,
+}
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct BacktestMetrics {
+    pub total_return: f64,
+    pub cagr: Option<f64>,
+    pub annualized_vol: Option<f64>,
+    pub sharpe_ratio: Option<f64>,
+    pub max_drawdown: f64,
+    pub max_drawdown_pct: f64,
+    pub win_rate: Option<f64>,
+    pub profit_factor: Option<f64>,
+    pub average_win: Option<f64>,
+    pub average_loss: Option<f64>,
+    pub total_trades: usize,
+    pub exposure_ratio: Option<f64>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -377,6 +549,9 @@ pub fn backtest(
     let broker = BrokerSim::new();
     let mut engine = strategy_engine(strategy);
     let mut trades: Vec<Trade> = Vec::new();
+    let mut equity_curve: Vec<(i64, f64)> = Vec::with_capacity(candles.len() + 1);
+    // Seed equity curve with starting cash at first candle timestamp
+    equity_curve.push((candles[0].timestamp, portfolio.cash()));
 
     let mut pending: Option<PendingOrder> = None;
 
@@ -494,6 +669,10 @@ pub fn backtest(
             },
             Signal::Hold | Signal::Entry(Side::Short) => {}
         }
+
+        // Mark-to-market equity at bar close
+        let equity = equity_value(portfolio.cash(), portfolio.position_qty, candle.close);
+        equity_curve.push((candle.timestamp, equity));
     }
 
     if !portfolio.is_flat() {
@@ -529,11 +708,17 @@ pub fn backtest(
             ExitReason::RuleTriggered,
             candles.len() - 1,
         ));
+
+        // Update final equity after liquidation
+        let equity = equity_value(portfolio.cash(), portfolio.position_qty, last.close);
+        equity_curve.push((last.timestamp, equity));
     }
 
     Ok(BacktestResult {
         starting_cash: config.initial_capital,
         ending_cash: portfolio.cash(),
+        metrics: compute_metrics(&trades, &equity_curve, config.initial_capital),
+        equity_curve,
         trades,
     })
 }

@@ -244,18 +244,18 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Metrics
 
-- [ ] `BacktestMetrics` struct (all fields from SPEC §6.2: returns, risk-adjusted, drawdown, trade stats, stress, exposure)
-- [ ] Metrics calculation from trade history
-- [ ] Trade log output: entry/exit timestamps, prices, P&L, exit reason, holding period
+- [x] `BacktestMetrics` struct (all fields from SPEC §6.2: returns, risk-adjusted, drawdown, trade stats, stress, exposure)
+- [x] Metrics calculation from trade history
+- [x] Trade log output: entry/exit timestamps, prices, P&L, exit reason, holding period
 
 ### Integrity Rules
 
-- [ ] No lookahead bias: indicators see only data up to current bar
-- [ ] Next-bar execution: entries/exits fill at next bar's open (default)
-- [ ] Slippage modeling (configurable, default 0.1% equities, 0.05% forex)
-- [ ] Commission modeling (flat fee or percentage)
-- [ ] Cash accounting: cannot buy more than available cash (no hidden margin)
-- [ ] No partial fills in MVP
+- [x] No lookahead bias: indicators see only data up to current bar
+- [x] Next-bar execution: entries/exits fill at next bar's open (default)
+- [x] Slippage modeling (configurable, default 0.1% equities, 0.05% forex)
+- [x] Commission modeling (flat fee or percentage)
+- [x] Cash accounting: cannot buy more than available cash (no hidden margin)
+- [x] No partial fills in MVP
 
 ### Overfitting Safeguards
 
