@@ -12,7 +12,7 @@
 //! See [SPEC.md](../SPEC.md) §6 for detailed requirements.
 
 use crate::strategy::evaluator::strategy_engine;
-use crate::strategy::types::Strategy;
+use crate::strategy::types::{ConditionNode, Strategy};
 use crate::types::{Candle, ExitReason, MantisError, Result, Side, Signal};
 
 #[cfg(feature = "serde")]
@@ -23,6 +23,18 @@ use serde::{Deserialize, Serialize};
 pub enum ExecutionModel {
     NextBarOpen,
     CurrentBarClose,
+}
+
+fn count_conditions(node: &ConditionNode) -> usize {
+    match node {
+        ConditionNode::Condition(_) => 1,
+        ConditionNode::Group(group) => match group {
+            crate::strategy::types::ConditionGroup::AllOf(children)
+            | crate::strategy::types::ConditionGroup::AnyOf(children) => {
+                children.iter().map(count_conditions).sum()
+            }
+        },
+    }
 }
 
 fn equity_value(cash: f64, position_qty: f64, mark_price: f64) -> f64 {
@@ -277,6 +289,7 @@ pub struct BacktestResult {
     pub equity_curve: Vec<(i64, f64)>,
     pub metrics: BacktestMetrics,
     pub trades: Vec<Trade>,
+    pub warnings: Vec<String>,
 }
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -552,6 +565,12 @@ pub fn backtest(
     config.validate()?;
     validate_candles(candles)?;
 
+    let condition_count = {
+        let entry_cnt = count_conditions(&strategy.entry);
+        let exit_cnt = strategy.exit.as_ref().map(count_conditions).unwrap_or(0);
+        entry_cnt + exit_cnt
+    };
+
     let mut portfolio = Portfolio::new(config.initial_capital)?;
     let broker = BrokerSim::new();
     let mut engine = strategy_engine(strategy);
@@ -559,6 +578,7 @@ pub fn backtest(
     let mut equity_curve: Vec<(i64, f64)> = Vec::with_capacity(candles.len() + 1);
     // Seed equity curve with starting cash at first candle timestamp
     equity_curve.push((candles[0].timestamp, portfolio.cash()));
+    let mut warnings: Vec<String> = Vec::new();
 
     let mut pending: Option<PendingOrder> = None;
 
@@ -723,12 +743,26 @@ pub fn backtest(
         }
     }
 
+    if trades.len() < 30 {
+        warnings.push(format!(
+            "Minimum trade count warning: {} trades (< 30) — results may be statistically unreliable",
+            trades.len()
+        ));
+    }
+    if condition_count > 7 {
+        warnings.push(format!(
+            "Excessive condition warning: {} conditions (> 7) — potential overfitting",
+            condition_count
+        ));
+    }
+
     Ok(BacktestResult {
         starting_cash: config.initial_capital,
         ending_cash: portfolio.cash(),
         metrics: compute_metrics(&trades, &equity_curve, config.initial_capital),
         equity_curve,
         trades,
+        warnings,
     })
 }
 
