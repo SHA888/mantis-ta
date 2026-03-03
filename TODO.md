@@ -274,8 +274,8 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Benchmarks
 
-- [ ] Full backtest benchmark: 2yr daily, 1 instrument (target: < 5 ms)
-- [ ] Full backtest benchmark: 2yr daily, 10 instruments (target: < 50 ms)
+- [x] Full backtest benchmark: 2yr daily, 1 instrument (target: < 5 ms)
+- [x] Full backtest benchmark: 2yr daily, 10 instruments (target: < 50 ms)
 
 ### Documentation
 
