@@ -1,0 +1,10 @@
+{
+  "indicator": "STDDEV",
+  "description": "Standard Deviation",
+  "period": 20,
+  "test_data": {
+    "prices": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00],
+    "expected_outputs": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.5278, 0.5104, 0.4930, 0.4756, 0.4582, 0.4408, 0.4234, 0.4060, 0.3886, 0.3712, 0.3538]
+  },
+  "notes": "STDDEV calculates population standard deviation. Warmup period equals the period parameter."
+}

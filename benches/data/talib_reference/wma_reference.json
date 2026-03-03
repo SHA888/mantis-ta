@@ -1,0 +1,10 @@
+{
+  "indicator": "WMA",
+  "description": "Weighted Moving Average",
+  "period": 20,
+  "test_data": {
+    "prices": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00],
+    "expected_outputs": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 45.76409523809524, 45.76409523809524, 45.76409523809524, 45.76409523809524, 45.76409523809524, 45.76409523809524, 45.76409523809524, 45.76409523809524, 45.76409523809524, 45.76409523809524, 45.76409523809524]
+  },
+  "notes": "WMA uses weighted average where recent prices have higher weights. Warmup period is equal to the period parameter."
+}
