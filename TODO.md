@@ -301,8 +301,8 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ### Testing & Benchmarks
 
-- [ ] TA-Lib reference JSONs for all Batch A indicators
-- [ ] Verification tests (TA-Lib parity < 1e-10)
+- [x] TA-Lib reference JSONs for all Batch A indicators
+- [x] Verification tests (TA-Lib parity < 1e-10)
 - [x] Unit tests per indicator (edge cases, warmup, reset)
 - [x] Streaming + batch benchmarks
 
