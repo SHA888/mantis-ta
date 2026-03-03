@@ -286,6 +286,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ## v0.5.0 — Tier 2 Indicators: Batch A (8 indicators)
 
+> **Released as v0.5.0** (v0.4.0 Backtesting Engine was completed but released separately).
 > Prioritized by usefulness for common strategy patterns. These indicators
 > expand what users can build in the Strategy Builder without needing to
 > wait for the full Tier 2 set.
