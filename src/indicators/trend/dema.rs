@@ -34,7 +34,6 @@ pub struct DEMA {
     period: usize,
     ema1: EMA,
     ema2: EMA,
-    ema1_values: Vec<Option<f64>>,
 }
 
 impl DEMA {
@@ -44,7 +43,6 @@ impl DEMA {
             period,
             ema1: EMA::new(period),
             ema2: EMA::new(period),
-            ema1_values: Vec::new(),
         }
     }
 
@@ -58,8 +56,6 @@ impl DEMA {
             close: value,
             volume: 0.0,
         });
-
-        self.ema1_values.push(ema1_val);
 
         if let Some(ema1) = ema1_val {
             let ema2_val = self.ema2.next(&Candle {
@@ -90,7 +86,6 @@ impl Indicator for DEMA {
     fn reset(&mut self) {
         self.ema1.reset();
         self.ema2.reset();
-        self.ema1_values.clear();
     }
 
     fn warmup_period(&self) -> usize {

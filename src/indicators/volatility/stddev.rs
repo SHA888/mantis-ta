@@ -53,9 +53,9 @@ impl StdDev {
             return None;
         }
 
-        let values: Vec<f64> = self.window.iter().copied().collect();
-        let mean = values.iter().sum::<f64>() / self.period as f64;
-        let variance = values
+        let mean = self.window.iter().sum::<f64>() / self.period as f64;
+        let variance = self
+            .window
             .iter()
             .map(|v| {
                 let diff = v - mean;

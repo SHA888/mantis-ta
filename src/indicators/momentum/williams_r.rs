@@ -66,7 +66,7 @@ impl WilliamsR {
         let lowest_low = self.lows.iter().copied().fold(f64::INFINITY, f64::min);
 
         let range = highest_high - lowest_low;
-        if range == 0.0 {
+        if range.abs() < 1e-10 {
             Some(0.0)
         } else {
             Some(((highest_high - close) / range) * -100.0)

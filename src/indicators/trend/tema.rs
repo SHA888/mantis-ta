@@ -27,7 +27,7 @@ use crate::types::Candle;
 ///
 /// let out = TEMA::new(3).calculate(&candles);
 /// assert!(out.iter().take(6).all(|v| v.is_none()));
-/// assert!(out.iter().skip(6).any(|v| v.is_some()));
+/// assert!(out[6].is_some());
 /// ```
 #[derive(Debug, Clone)]
 pub struct TEMA {
