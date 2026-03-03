@@ -15,7 +15,7 @@ Every indicator is verified against [TA-Lib](https://ta-lib.org/) reference outp
 
 ```toml
 [dependencies]
-mantis-ta = "0.1"
+mantis-ta = "0.5"
 ```
 
 ## Quick Start
@@ -119,13 +119,16 @@ println!("Trades:       {}",     result.metrics.total_trades);
 ## Available Indicators
 
 ### Trend
-`SMA` · `EMA` · `WMA` · `DEMA` · `TEMA` · `MACD` · `Ichimoku` · `Parabolic SAR` · `ADX` · `Supertrend`
+**v0.5.0 Batch A:** `SMA` · `EMA` · `WMA` · `DEMA` · `TEMA` · `MACD` · `ADX`
+**Future:** `Ichimoku` · `Parabolic SAR` · `Supertrend`
 
 ### Momentum
-`RSI` · `Stochastic` · `CCI` · `Williams %R` · `ROC` · `MFI`
+**v0.5.0 Batch A:** `RSI` · `Stochastic` · `CCI` · `Williams %R` · `ROC`
+**Future:** `MFI`
 
 ### Volatility
-`Bollinger Bands` · `ATR` · `Keltner Channels` · `Standard Deviation`
+**v0.5.0 Batch A:** `Bollinger Bands` · `ATR` · `Standard Deviation`
+**Future:** `Keltner Channels`
 
 ### Volume
 `OBV` · `Volume SMA` · `VWAP` · `Accumulation/Distribution`
@@ -139,14 +142,14 @@ See the [full indicator list](https://docs.rs/mantis-ta/latest/mantis_ta/indicat
 
 ```toml
 [dependencies]
-mantis-ta = { version = "0.1", features = ["strategy", "backtest"] }
+mantis-ta = { version = "0.5", features = ["strategy", "backtest"] }
 ```
 
 | Feature | Default | Description |
 |---------|---------|-------------|
 | `serde` | ✓ | Serialize strategies, indicators, and results to JSON |
-| `strategy` | | Strategy composition engine |
-| `backtest` | | Backtesting engine (requires `strategy`) |
+| `strategy` | ✓ | Strategy composition engine (v0.2.0+) |
+| `backtest` | ✓ | Backtesting engine with metrics (v0.4.0+) |
 | `ndarray` | | Interop with the `ndarray` ecosystem |
 | `full-indicators` | | All 50+ indicators (default includes 30 most common) |
 | `simd` | | SIMD-accelerated batch computation (uses `unsafe`) |
