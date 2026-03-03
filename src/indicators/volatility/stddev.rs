@@ -119,4 +119,52 @@ mod tests {
         assert!((outputs[2].unwrap() - 0.8165).abs() < 0.001);
         assert!(outputs[3].is_some());
     }
+
+    #[test]
+    fn stddev_reset_clears_state() {
+        let mut stddev = StdDev::new(3);
+        let candle = Candle {
+            timestamp: 0,
+            open: 1.0,
+            high: 1.0,
+            low: 1.0,
+            close: 1.0,
+            volume: 0.0,
+        };
+
+        stddev.next(&candle);
+        stddev.next(&candle);
+        stddev.next(&candle);
+        assert!(stddev.next(&candle).is_some());
+
+        stddev.reset();
+        assert_eq!(stddev.next(&candle), None);
+    }
+
+    #[test]
+    fn stddev_with_constant_values() {
+        let mut stddev = StdDev::new(3);
+        let candles = [5.0, 5.0, 5.0]
+            .iter()
+            .map(|c| Candle {
+                timestamp: 0,
+                open: *c,
+                high: *c,
+                low: *c,
+                close: *c,
+                volume: 0.0,
+            })
+            .collect::<Vec<_>>();
+
+        let outputs: Vec<_> = candles.iter().map(|c| stddev.next(c)).collect();
+        assert_eq!(outputs[0], None);
+        assert_eq!(outputs[1], None);
+        assert_eq!(outputs[2], Some(0.0));
+    }
+
+    #[test]
+    fn stddev_warmup_period() {
+        let stddev = StdDev::new(5);
+        assert_eq!(stddev.warmup_period(), 5);
+    }
 }
