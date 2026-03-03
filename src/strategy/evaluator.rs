@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::indicators::{Indicator, ATR, EMA, RSI, SMA};
+use crate::indicators::{Indicator, ATR, CCI, DEMA, EMA, ROC, RSI, SMA, StdDev, TEMA, WMA, WilliamsR, ADX};
 use crate::strategy::types::{
     CompareTarget, Condition, ConditionGroup, ConditionNode, Operator, Strategy,
 };
@@ -14,6 +14,14 @@ enum IndicatorInstance {
     EMA(EMA),
     RSI(RSI),
     ATR(ATR),
+    WMA(WMA),
+    DEMA(DEMA),
+    TEMA(TEMA),
+    CCI(CCI),
+    WilliamsR(WilliamsR),
+    ROC(ROC),
+    StdDev(StdDev),
+    ADX(ADX),
 }
 
 impl IndicatorInstance {
@@ -23,6 +31,17 @@ impl IndicatorInstance {
             IndicatorInstance::EMA(i) => i.next(candle),
             IndicatorInstance::RSI(i) => i.next(candle),
             IndicatorInstance::ATR(i) => i.next(candle),
+            IndicatorInstance::WMA(i) => i.next(candle),
+            IndicatorInstance::DEMA(i) => i.next(candle),
+            IndicatorInstance::TEMA(i) => i.next(candle),
+            IndicatorInstance::CCI(i) => i.next(candle),
+            IndicatorInstance::WilliamsR(i) => i.next(candle),
+            IndicatorInstance::ROC(i) => i.next(candle),
+            IndicatorInstance::StdDev(i) => i.next(candle),
+            IndicatorInstance::ADX(i) => {
+                // ADX returns AdxOutput, extract the adx value
+                i.next(candle).map(|output| output.adx)
+            }
         }
     }
 }
@@ -33,6 +52,14 @@ impl IndicatorInstance {
 /// - "ema{period}"
 /// - "rsi{period}"
 /// - "atr{period}"
+/// - "wma{period}"
+/// - "dema{period}"
+/// - "tema{period}"
+/// - "cci{period}"
+/// - "williams_r{period}"
+/// - "roc{period}"
+/// - "stddev{period}"
+/// - "adx{period}"
 fn parse_indicator(name: &str) -> Option<IndicatorInstance> {
     if let Some(rest) = name.strip_prefix("sma") {
         if let Ok(p) = rest.parse::<usize>() {
@@ -52,6 +79,46 @@ fn parse_indicator(name: &str) -> Option<IndicatorInstance> {
     if let Some(rest) = name.strip_prefix("atr") {
         if let Ok(p) = rest.parse::<usize>() {
             return Some(IndicatorInstance::ATR(ATR::new(p)));
+        }
+    }
+    if let Some(rest) = name.strip_prefix("wma") {
+        if let Ok(p) = rest.parse::<usize>() {
+            return Some(IndicatorInstance::WMA(WMA::new(p)));
+        }
+    }
+    if let Some(rest) = name.strip_prefix("dema") {
+        if let Ok(p) = rest.parse::<usize>() {
+            return Some(IndicatorInstance::DEMA(DEMA::new(p)));
+        }
+    }
+    if let Some(rest) = name.strip_prefix("tema") {
+        if let Ok(p) = rest.parse::<usize>() {
+            return Some(IndicatorInstance::TEMA(TEMA::new(p)));
+        }
+    }
+    if let Some(rest) = name.strip_prefix("cci") {
+        if let Ok(p) = rest.parse::<usize>() {
+            return Some(IndicatorInstance::CCI(CCI::new(p)));
+        }
+    }
+    if let Some(rest) = name.strip_prefix("williams_r") {
+        if let Ok(p) = rest.parse::<usize>() {
+            return Some(IndicatorInstance::WilliamsR(WilliamsR::new(p)));
+        }
+    }
+    if let Some(rest) = name.strip_prefix("roc") {
+        if let Ok(p) = rest.parse::<usize>() {
+            return Some(IndicatorInstance::ROC(ROC::new(p)));
+        }
+    }
+    if let Some(rest) = name.strip_prefix("stddev") {
+        if let Ok(p) = rest.parse::<usize>() {
+            return Some(IndicatorInstance::StdDev(StdDev::new(p)));
+        }
+    }
+    if let Some(rest) = name.strip_prefix("adx") {
+        if let Ok(p) = rest.parse::<usize>() {
+            return Some(IndicatorInstance::ADX(ADX::new(p)));
         }
     }
     None
@@ -519,5 +586,98 @@ mod tests {
         if let (Some(ei), Some(xi)) = (entry_idx, exit_idx) {
             assert!(ei < xi, "entry should occur before exit");
         }
+    }
+
+    #[test]
+    fn batch_a_indicators_in_strategy_flow() {
+        // Test WMA indicator in strategy
+        let entry = IndicatorRef::wma(3).crosses_above_indicator(IndicatorRef::sma(3));
+        let strategy = Strategy::builder("wma_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let prices = [1.0, 2.0, 3.0, 4.0, 5.0];
+        let candles = make_candles(&prices);
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+        assert!(!signals.is_empty());
+
+        // Test ROC indicator in strategy
+        let entry = IndicatorRef::roc(2).is_above(0.0);
+        let strategy = Strategy::builder("roc_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+        assert!(!signals.is_empty());
+
+        // Test StdDev indicator in strategy
+        let entry = IndicatorRef::stddev(3).is_above(0.5);
+        let strategy = Strategy::builder("stddev_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+        assert!(!signals.is_empty());
+
+        // Test DEMA indicator in strategy
+        let entry = IndicatorRef::dema(3).crosses_above(2.5);
+        let strategy = Strategy::builder("dema_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+        assert!(!signals.is_empty());
+
+        // Test TEMA indicator in strategy
+        let entry = IndicatorRef::tema(3).is_above(2.0);
+        let strategy = Strategy::builder("tema_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+        assert!(!signals.is_empty());
+
+        // Test CCI indicator in strategy
+        let entry = IndicatorRef::cci(3).is_above(0.0);
+        let strategy = Strategy::builder("cci_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+        assert!(!signals.is_empty());
+
+        // Test Williams %R indicator in strategy
+        let entry = IndicatorRef::williams_r(3).is_below(-50.0);
+        let strategy = Strategy::builder("williams_r_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+        assert!(!signals.is_empty());
+
+        // Test ADX indicator in strategy
+        let entry = IndicatorRef::adx(3).is_above(20.0);
+        let strategy = Strategy::builder("adx_test")
+            .entry(entry)
+            .stop_loss(StopLoss::FixedPercent(1.0))
+            .build()
+            .unwrap();
+
+        let signals = evaluate_strategy_batch(&strategy, &candles);
+        assert!(!signals.is_empty());
     }
 }
