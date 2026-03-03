@@ -1,0 +1,10 @@
+{
+  "indicator": "ROC",
+  "description": "Rate of Change",
+  "period": 12,
+  "test_data": {
+    "prices": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00],
+    "expected_outputs": [null, null, null, null, null, null, null, null, null, null, null, null, 2.8606, 4.9659, 4.0000, 4.0000, 4.0000, 4.0000, 4.0000, 4.0000]
+  },
+  "notes": "ROC = ((price - price[period]) / price[period]) * 100. Warmup period equals the period parameter."
+}

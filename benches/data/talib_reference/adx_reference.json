@@ -1,0 +1,12 @@
+{
+  "indicator": "ADX",
+  "description": "Average Directional Index",
+  "period": 14,
+  "test_data": {
+    "high": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.50, 46.75, 47.00, 47.25, 47.50, 47.75, 48.00, 48.25, 48.50, 48.75, 49.00, 49.25, 49.50],
+    "low": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.25, 46.50, 46.75, 47.00, 47.25, 47.50, 47.75, 48.00, 48.25, 48.50, 48.75, 49.00, 49.25],
+    "close": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.38, 46.63, 46.88, 47.13, 47.38, 47.63, 47.88, 48.13, 48.38, 48.63, 48.88, 49.13, 49.38],
+    "expected_adx": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 25.5]
+  },
+  "notes": "ADX measures trend strength. Output includes adx, plus_di, minus_di. Warmup period is period*2=28 for period=14."
+}

@@ -1,0 +1,12 @@
+{
+  "indicator": "WILLIAMS_R",
+  "description": "Williams %R (Percent Range)",
+  "period": 14,
+  "test_data": {
+    "high": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00],
+    "low": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00],
+    "close": [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.00, 46.00, 46.00, 46.00, 46.00, 46.00],
+    "expected_outputs": [null, null, null, null, null, null, null, null, null, null, null, null, null, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  },
+  "notes": "%R = ((HH - C) / (HH - LL)) * -100. HH = highest high over period, LL = lowest low over period. Returns 0.0 when range is near zero. Warmup period equals the period parameter."
+}
