@@ -290,14 +290,14 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 > expand what users can build in the Strategy Builder without needing to
 > wait for the full Tier 2 set.
 
-- [ ] ADX (Average Directional Index) — `AdxOutput` ← **priority: needed by `mantis-regime` MVP**
-- [ ] WMA (Weighted Moving Average) — `f64`
-- [ ] DEMA (Double Exponential Moving Average) — `f64`
-- [ ] TEMA (Triple Exponential Moving Average) — `f64`
-- [ ] CCI (Commodity Channel Index) — `f64`
-- [ ] Williams %R — `f64`
-- [ ] ROC (Rate of Change) — `f64`
-- [ ] Standard Deviation — `f64`
+- [x] ADX (Average Directional Index) — `AdxOutput` ← **priority: needed by `mantis-regime` MVP**
+- [x] WMA (Weighted Moving Average) — `f64`
+- [x] DEMA (Double Exponential Moving Average) — `f64`
+- [x] TEMA (Triple Exponential Moving Average) — `f64`
+- [x] CCI (Commodity Channel Index) — `f64`
+- [x] Williams %R — `f64`
+- [x] ROC (Rate of Change) — `f64`
+- [x] Standard Deviation — `f64`
 
 ### Testing & Benchmarks
 
