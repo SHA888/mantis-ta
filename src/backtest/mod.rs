@@ -14,7 +14,6 @@
 use crate::strategy::evaluator::strategy_engine;
 use crate::strategy::types::Strategy;
 use crate::types::{Candle, ExitReason, MantisError, Result, Side, Signal};
-use std::f64::INFINITY;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -35,6 +34,13 @@ fn compute_metrics(
     equity_curve: &[(i64, f64)],
     starting_cash: f64,
 ) -> BacktestMetrics {
+    // Validate equity curve values are finite
+    for (i, &(_, eq)) in equity_curve.iter().enumerate() {
+        if !eq.is_finite() {
+            eprintln!("Warning: equity curve contains non-finite value at index {}", i);
+        }
+    }
+
     let total_return = if starting_cash > 0.0 {
         equity_curve
             .last()
@@ -85,9 +91,9 @@ fn compute_metrics(
         None
     };
 
-    // CAGR based on timestamps if available
+    // CAGR based on timestamps (assumes timestamps are in milliseconds)
     let cagr = if equity_curve.len() >= 2 {
-        let start_ts = equity_curve.first().unwrap().0 as f64 / 1000.0; // seconds
+        let start_ts = equity_curve.first().unwrap().0 as f64 / 1000.0; // ms -> seconds
         let end_ts = equity_curve.last().unwrap().0 as f64 / 1000.0;
         let duration_years = (end_ts - start_ts) / (365.0 * 24.0 * 3600.0);
         if duration_years > 0.0 && starting_cash > 0.0 {
@@ -102,7 +108,7 @@ fn compute_metrics(
     };
 
     // Drawdown
-    let mut peak = f64::MIN;
+    let mut peak = equity_curve.first().map(|(_, eq)| *eq).unwrap_or(0.0);
     let mut max_dd = 0.0;
     for &(_, eq) in equity_curve {
         if eq > peak {
@@ -138,7 +144,7 @@ fn compute_metrics(
         None
     };
     let profit_factor = match (win_sum, loss_sum) {
-        (_, 0.0) if wins > 0 => Some(INFINITY),
+        (_, 0.0) if wins > 0 => Some(f64::INFINITY),
         (ws, ls) if ls > 0.0 => Some(ws / ls),
         _ => None,
     };
@@ -153,11 +159,12 @@ fn compute_metrics(
         None
     };
 
-    // Exposure: time in market divided by total bars
-    let total_bars = equity_curve.len().saturating_sub(1); // edges
+    // Exposure: sum of holding periods divided by total backtest duration
+    // Note: This assumes non-overlapping trades (true for long-only strategies)
+    let total_bars = equity_curve.len().saturating_sub(1);
     let holding_bars: usize = trades.iter().map(|t| t.holding_period_bars).sum();
     let exposure_ratio = if total_bars > 0 {
-        Some(holding_bars as f64 / total_bars as f64)
+        Some((holding_bars as f64 / total_bars as f64).min(1.0))
     } else {
         None
     };
@@ -709,9 +716,11 @@ pub fn backtest(
             candles.len() - 1,
         ));
 
-        // Update final equity after liquidation
+        // Update final equity after liquidation (replace last equity point to avoid duplicate timestamp)
         let equity = equity_value(portfolio.cash(), portfolio.position_qty, last.close);
-        equity_curve.push((last.timestamp, equity));
+        if let Some(last_entry) = equity_curve.last_mut() {
+            last_entry.1 = equity;
+        }
     }
 
     Ok(BacktestResult {
