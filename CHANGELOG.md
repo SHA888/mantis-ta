@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] — 2026-03-03
+
+### Added
+
+#### Tier 2 Indicators: Batch A (8 indicators)
+- **ADX** (Average Directional Index) — trend strength measurement with +DI, -DI, ADX values
+- **WMA** (Weighted Moving Average) — linearly weighted moving average
+- **DEMA** (Double Exponential Moving Average) — reduced-lag moving average
+- **TEMA** (Triple Exponential Moving Average) — further reduced-lag moving average
+- **CCI** (Commodity Channel Index) — deviation from typical price
+- **Williams %R** (Williams Percent Range) — momentum oscillator (-100 to 0)
+- **ROC** (Rate of Change) — percentage price change over period
+- **StdDev** (Standard Deviation) — volatility measurement
+
+#### Strategy Integration
+- `IndicatorRef` convenience constructors for all Batch A indicators (`adx()`, `wma()`, `dema()`, `tema()`, `cci()`, `williams_r()`, `roc()`, `stddev()`)
+- Updated `StrategyEngine` evaluator to support all Batch A indicators in strategy builder
+- Comprehensive integration test verifying all indicators work in strategy builder → eval → signal flow
+
+#### Testing & Verification
+- TA-Lib reference JSON files for all Batch A indicators
+- Verification test suite with 10 tests covering consistency, streaming vs batch equivalence, reset functionality
+- Comprehensive unit tests for each indicator (edge cases, warmup periods, reset behavior)
+- Streaming + batch benchmarks for all 8 indicators (16 total benchmarks)
+
+### Fixed
+- **ROC reset bug**: Fixed window size inconsistency in `reset()` method (was `period + 1`, now `period`)
+- **CCI performance**: Removed unnecessary `Vec<f64>` allocation on every update, now calculates directly from iterator
+
+### Changed
+- Version bump from 0.2.0 to 0.5.0 (v0.4.0 Backtesting Engine released separately)
+
 ## [0.2.0] — 2026-02-26
 
 ### Added
