@@ -86,6 +86,46 @@ impl IndicatorRef {
         Self::new("pivot_points")
     }
 
+    /// ADX convenience constructor.
+    pub fn adx(period: usize) -> Self {
+        Self::new(format!("adx{}", period))
+    }
+
+    /// WMA convenience constructor.
+    pub fn wma(period: usize) -> Self {
+        Self::new(format!("wma{}", period))
+    }
+
+    /// DEMA convenience constructor.
+    pub fn dema(period: usize) -> Self {
+        Self::new(format!("dema{}", period))
+    }
+
+    /// TEMA convenience constructor.
+    pub fn tema(period: usize) -> Self {
+        Self::new(format!("tema{}", period))
+    }
+
+    /// CCI convenience constructor.
+    pub fn cci(period: usize) -> Self {
+        Self::new(format!("cci{}", period))
+    }
+
+    /// Williams %R convenience constructor.
+    pub fn williams_r(period: usize) -> Self {
+        Self::new(format!("williams_r{}", period))
+    }
+
+    /// ROC convenience constructor.
+    pub fn roc(period: usize) -> Self {
+        Self::new(format!("roc{}", period))
+    }
+
+    /// Standard Deviation convenience constructor.
+    pub fn stddev(period: usize) -> Self {
+        Self::new(format!("stddev{}", period))
+    }
+
     // Condition building methods
 
     /// Create a condition: this indicator crosses above a value.
@@ -287,6 +327,33 @@ mod tests {
 
         let obv = IndicatorRef::obv();
         assert_eq!(obv.name, "obv");
+    }
+
+    #[test]
+    fn batch_a_indicator_ref_convenience_constructors() {
+        let adx = IndicatorRef::adx(14);
+        assert_eq!(adx.name, "adx14");
+
+        let wma = IndicatorRef::wma(20);
+        assert_eq!(wma.name, "wma20");
+
+        let dema = IndicatorRef::dema(10);
+        assert_eq!(dema.name, "dema10");
+
+        let tema = IndicatorRef::tema(10);
+        assert_eq!(tema.name, "tema10");
+
+        let cci = IndicatorRef::cci(20);
+        assert_eq!(cci.name, "cci20");
+
+        let williams_r = IndicatorRef::williams_r(14);
+        assert_eq!(williams_r.name, "williams_r14");
+
+        let roc = IndicatorRef::roc(12);
+        assert_eq!(roc.name, "roc12");
+
+        let stddev = IndicatorRef::stddev(20);
+        assert_eq!(stddev.name, "stddev20");
     }
 
     #[test]
