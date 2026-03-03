@@ -303,13 +303,13 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 - [ ] TA-Lib reference JSONs for all Batch A indicators
 - [ ] Verification tests (TA-Lib parity < 1e-10)
-- [ ] Unit tests per indicator (edge cases, warmup, reset)
-- [ ] Streaming + batch benchmarks
+- [x] Unit tests per indicator (edge cases, warmup, reset)
+- [x] Streaming + batch benchmarks
 
 ### Strategy Integration
 
-- [ ] Add `IndicatorRef` convenience constructors for new indicators (`adx()`, `wma()`, `cci()`, etc.)
-- [ ] Verify new indicators work in strategy builder → eval → signal flow
+- [x] Add `IndicatorRef` convenience constructors for new indicators (`adx()`, `wma()`, `cci()`, etc.)
+- [x] Verify new indicators work in strategy builder → eval → signal flow
 
 ---
 
