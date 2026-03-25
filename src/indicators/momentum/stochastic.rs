@@ -136,13 +136,17 @@ mod tests {
         .collect();
 
         let outputs: Vec<_> = candles.iter().map(|c| stoch.next(c)).collect();
-        assert!(outputs
-            .iter()
-            .take(stoch.warmup_period() - 1)
-            .all(|o| o.is_none()));
-        assert!(outputs
-            .iter()
-            .skip(stoch.warmup_period() - 1)
-            .any(|o| o.is_some()));
+        assert!(
+            outputs
+                .iter()
+                .take(stoch.warmup_period() - 1)
+                .all(|o| o.is_none())
+        );
+        assert!(
+            outputs
+                .iter()
+                .skip(stoch.warmup_period() - 1)
+                .any(|o| o.is_some())
+        );
     }
 }

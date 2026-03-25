@@ -1,4 +1,4 @@
-use mantis_ta::indicators::{Indicator, EMA};
+use mantis_ta::indicators::{EMA, Indicator};
 use mantis_ta::types::Candle;
 
 fn main() {

@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 
 use mantis_ta::strategy::evaluator::evaluate_strategy_batch;
 use mantis_ta::strategy::indicator_ref::IndicatorRef;

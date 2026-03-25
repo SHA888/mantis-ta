@@ -151,7 +151,7 @@ mod tests {
 
         let outputs: Vec<_> = candles.iter().map(|c| rsi.next(c)).collect();
         let wp = rsi.warmup_period(); // period + 1
-                                      // First wp-1 outputs should be None
+        // First wp-1 outputs should be None
         assert!(outputs.iter().take(wp - 1).all(|o| o.is_none()));
         // Output at index wp-1 should be the first Some
         assert!(outputs[wp - 1].is_some());

@@ -1,7 +1,7 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 
 use mantis_ta::indicators::{
-    BollingerBands, Indicator, PivotPoints, Stochastic, VolumeSMA, ATR, EMA, MACD, OBV, RSI, SMA,
+    ATR, BollingerBands, EMA, Indicator, MACD, OBV, PivotPoints, RSI, SMA, Stochastic, VolumeSMA,
 };
 
 mod common;

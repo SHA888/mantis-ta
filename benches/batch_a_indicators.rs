@@ -1,5 +1,5 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use mantis_ta::indicators::{Indicator, CCI, DEMA, ROC, StdDev, TEMA, WMA, WilliamsR, ADX};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use mantis_ta::indicators::{ADX, CCI, DEMA, Indicator, ROC, StdDev, TEMA, WMA, WilliamsR};
 use mantis_ta::types::Candle;
 
 fn generate_candles(count: usize) -> Vec<Candle> {

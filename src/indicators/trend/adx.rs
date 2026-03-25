@@ -1,5 +1,5 @@
 use crate::indicators::Indicator;
-use crate::types::{Candle, AdxOutput};
+use crate::types::{AdxOutput, Candle};
 use crate::utils::ringbuf::RingBuf;
 
 /// Average Directional Index measuring trend strength.
@@ -101,14 +101,18 @@ impl ADX {
                 self.minus_dm_sum += minus_dm;
             } else if self.bar_count == self.period + 1 {
                 self.tr_sum = self.tr_sum - self.tr_sum / self.period as f64 + tr;
-                self.plus_dm_sum = self.plus_dm_sum - self.plus_dm_sum / self.period as f64 + plus_dm;
-                self.minus_dm_sum = self.minus_dm_sum - self.minus_dm_sum / self.period as f64 + minus_dm;
+                self.plus_dm_sum =
+                    self.plus_dm_sum - self.plus_dm_sum / self.period as f64 + plus_dm;
+                self.minus_dm_sum =
+                    self.minus_dm_sum - self.minus_dm_sum / self.period as f64 + minus_dm;
                 self.plus_di = Some((self.plus_dm_sum / self.tr_sum) * 100.0);
                 self.minus_di = Some((self.minus_dm_sum / self.tr_sum) * 100.0);
             } else {
                 self.tr_sum = self.tr_sum - self.tr_sum / self.period as f64 + tr;
-                self.plus_dm_sum = self.plus_dm_sum - self.plus_dm_sum / self.period as f64 + plus_dm;
-                self.minus_dm_sum = self.minus_dm_sum - self.minus_dm_sum / self.period as f64 + minus_dm;
+                self.plus_dm_sum =
+                    self.plus_dm_sum - self.plus_dm_sum / self.period as f64 + plus_dm;
+                self.minus_dm_sum =
+                    self.minus_dm_sum - self.minus_dm_sum / self.period as f64 + minus_dm;
 
                 let new_plus_di = (self.plus_dm_sum / self.tr_sum) * 100.0;
                 let new_minus_di = (self.minus_dm_sum / self.tr_sum) * 100.0;
@@ -130,7 +134,8 @@ impl ADX {
                     self.adx = Some(adx_sum / self.period as f64);
                 } else if self.bar_count > self.period * 2 {
                     let prev_adx = self.adx.unwrap_or(0.0);
-                    self.adx = Some((prev_adx * (self.period - 1) as f64 + dx) / self.period as f64);
+                    self.adx =
+                        Some((prev_adx * (self.period - 1) as f64 + dx) / self.period as f64);
                 }
             }
         }

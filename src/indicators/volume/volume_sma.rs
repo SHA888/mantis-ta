@@ -99,13 +99,17 @@ mod tests {
             .collect();
 
         let outputs: Vec<_> = candles.iter().map(|c| v_sma.next(c)).collect();
-        assert!(outputs
-            .iter()
-            .take(v_sma.warmup_period() - 1)
-            .all(|o| o.is_none()));
-        assert!(outputs
-            .iter()
-            .skip(v_sma.warmup_period() - 1)
-            .any(|o| o.is_some()));
+        assert!(
+            outputs
+                .iter()
+                .take(v_sma.warmup_period() - 1)
+                .all(|o| o.is_none())
+        );
+        assert!(
+            outputs
+                .iter()
+                .skip(v_sma.warmup_period() - 1)
+                .any(|o| o.is_some())
+        );
     }
 }

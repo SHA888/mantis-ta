@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::indicators::{Indicator, ATR, CCI, DEMA, EMA, ROC, RSI, SMA, StdDev, TEMA, WMA, WilliamsR, ADX};
+use crate::indicators::{
+    ADX, ATR, CCI, DEMA, EMA, Indicator, ROC, RSI, SMA, StdDev, TEMA, WMA, WilliamsR,
+};
 use crate::strategy::types::{
     CompareTarget, Condition, ConditionGroup, ConditionNode, Operator, Strategy,
 };
@@ -222,11 +224,7 @@ fn eval_node(
                         None => any_none = true,
                     }
                 }
-                if any_none {
-                    None
-                } else {
-                    Some(true)
-                }
+                if any_none { None } else { Some(true) }
             }
             ConditionGroup::AnyOf(nodes) => {
                 let mut any_none = false;
@@ -237,11 +235,7 @@ fn eval_node(
                         None => any_none = true,
                     }
                 }
-                if any_none {
-                    None
-                } else {
-                    Some(false)
-                }
+                if any_none { None } else { Some(false) }
             }
         },
     }
@@ -250,11 +244,7 @@ fn eval_node(
 const EPS: f64 = 1e-9;
 
 fn get_prev_n(name: &str, prev: &HashMap<String, f64>, n: u32) -> Option<f64> {
-    if n == 1 {
-        get_value(name, prev)
-    } else {
-        None
-    }
+    if n == 1 { get_value(name, prev) } else { None }
 }
 
 fn eval_condition(
@@ -358,11 +348,11 @@ pub fn strategy_engine(strategy: Strategy) -> StrategyEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::strategy::StopLoss;
     use crate::strategy::indicator_ref::IndicatorRef;
     use crate::strategy::types::{
         CompareTarget, Condition, ConditionGroup, ConditionNode, Operator,
     };
-    use crate::strategy::StopLoss;
 
     fn make_candles(prices: &[f64]) -> Vec<Candle> {
         prices
