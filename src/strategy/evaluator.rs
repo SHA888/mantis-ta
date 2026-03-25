@@ -63,65 +63,53 @@ impl IndicatorInstance {
 /// - "stddev{period}"
 /// - "adx{period}"
 fn parse_indicator(name: &str) -> Option<IndicatorInstance> {
-    if let Some(rest) = name.strip_prefix("sma") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::SMA(SMA::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("sma")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::SMA(SMA::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("ema") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::EMA(EMA::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("ema")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::EMA(EMA::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("rsi") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::RSI(RSI::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("rsi")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::RSI(RSI::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("atr") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::ATR(ATR::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("atr")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::ATR(ATR::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("wma") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::WMA(WMA::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("wma")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::WMA(WMA::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("dema") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::DEMA(DEMA::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("dema")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::DEMA(DEMA::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("tema") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::TEMA(TEMA::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("tema")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::TEMA(TEMA::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("cci") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::CCI(CCI::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("cci")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::CCI(CCI::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("williams_r") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::WilliamsR(WilliamsR::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("williams_r")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::WilliamsR(WilliamsR::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("roc") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::ROC(ROC::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("roc")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::ROC(ROC::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("stddev") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::StdDev(StdDev::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("stddev")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::StdDev(StdDev::new(p)));
     }
-    if let Some(rest) = name.strip_prefix("adx") {
-        if let Ok(p) = rest.parse::<usize>() {
-            return Some(IndicatorInstance::ADX(ADX::new(p)));
-        }
+    if let Some(rest) = name.strip_prefix("adx")
+        && let Ok(p) = rest.parse::<usize>() {
+        return Some(IndicatorInstance::ADX(ADX::new(p)));
     }
     None
 }

@@ -18,62 +18,62 @@ impl IndicatorRef {
 
     /// SMA convenience constructor.
     pub fn sma(period: usize) -> Self {
-        Self::new(format!("sma{}", period))
+        Self::new(format!("sma{period}"))
     }
 
     /// EMA convenience constructor.
     pub fn ema(period: usize) -> Self {
-        Self::new(format!("ema{}", period))
+        Self::new(format!("ema{period}"))
     }
 
     /// MACD convenience constructor.
     pub fn macd(fast: usize, slow: usize, signal: usize) -> Self {
-        Self::new(format!("macd_{}_{}_{}_line", fast, slow, signal))
+        Self::new(format!("macd_{fast}_{slow}_{signal}_line"))
     }
 
     /// MACD signal line convenience constructor.
     pub fn macd_signal(fast: usize, slow: usize, signal: usize) -> Self {
-        Self::new(format!("macd_{}_{}_{}_signal", fast, slow, signal))
+        Self::new(format!("macd_{fast}_{slow}_{signal}_signal"))
     }
 
     /// RSI convenience constructor.
     pub fn rsi(period: usize) -> Self {
-        Self::new(format!("rsi{}", period))
+        Self::new(format!("rsi{period}"))
     }
 
     /// Stochastic %K convenience constructor.
     pub fn stoch_k(k_period: usize, d_period: usize) -> Self {
-        Self::new(format!("stoch_{}_{}_k", k_period, d_period))
+        Self::new(format!("stoch_{k_period}_{d_period}_k"))
     }
 
     /// Stochastic %D convenience constructor.
     pub fn stoch_d(k_period: usize, d_period: usize) -> Self {
-        Self::new(format!("stoch_{}_{}_d", k_period, d_period))
+        Self::new(format!("stoch_{k_period}_{d_period}_d"))
     }
 
     /// Bollinger Bands upper convenience constructor.
     pub fn bb_upper(period: usize, std_dev: f64) -> Self {
-        Self::new(format!("bb_{}_{}_upper", period, std_dev))
+        Self::new(format!("bb_{period}_{std_dev}_upper"))
     }
 
     /// Bollinger Bands middle convenience constructor.
     pub fn bb_middle(period: usize, std_dev: f64) -> Self {
-        Self::new(format!("bb_{}_{}_middle", period, std_dev))
+        Self::new(format!("bb_{period}_{std_dev}_middle"))
     }
 
     /// Bollinger Bands lower convenience constructor.
     pub fn bb_lower(period: usize, std_dev: f64) -> Self {
-        Self::new(format!("bb_{}_{}_lower", period, std_dev))
+        Self::new(format!("bb_{period}_{std_dev}_lower"))
     }
 
     /// ATR convenience constructor.
     pub fn atr(period: usize) -> Self {
-        Self::new(format!("atr{}", period))
+        Self::new(format!("atr{period}"))
     }
 
     /// Volume SMA convenience constructor.
     pub fn volume_sma(period: usize) -> Self {
-        Self::new(format!("volume_sma_{}", period))
+        Self::new(format!("volume_sma_{period}"))
     }
 
     /// OBV convenience constructor.
@@ -88,42 +88,42 @@ impl IndicatorRef {
 
     /// ADX convenience constructor.
     pub fn adx(period: usize) -> Self {
-        Self::new(format!("adx{}", period))
+        Self::new(format!("adx{period}"))
     }
 
     /// WMA convenience constructor.
     pub fn wma(period: usize) -> Self {
-        Self::new(format!("wma{}", period))
+        Self::new(format!("wma{period}"))
     }
 
     /// DEMA convenience constructor.
     pub fn dema(period: usize) -> Self {
-        Self::new(format!("dema{}", period))
+        Self::new(format!("dema{period}"))
     }
 
     /// TEMA convenience constructor.
     pub fn tema(period: usize) -> Self {
-        Self::new(format!("tema{}", period))
+        Self::new(format!("tema{period}"))
     }
 
     /// CCI convenience constructor.
     pub fn cci(period: usize) -> Self {
-        Self::new(format!("cci{}", period))
+        Self::new(format!("cci{period}"))
     }
 
     /// Williams %R convenience constructor.
     pub fn williams_r(period: usize) -> Self {
-        Self::new(format!("williams_r{}", period))
+        Self::new(format!("williams_r{period}"))
     }
 
     /// ROC convenience constructor.
     pub fn roc(period: usize) -> Self {
-        Self::new(format!("roc{}", period))
+        Self::new(format!("roc{period}"))
     }
 
     /// Standard Deviation convenience constructor.
     pub fn stddev(period: usize) -> Self {
-        Self::new(format!("stddev{}", period))
+        Self::new(format!("stddev{period}"))
     }
 
     // Condition building methods
