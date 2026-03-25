@@ -1,8 +1,8 @@
 [package]
 name = "mantis-ta"
-version = "0.5.2"
+version = "0.5.3"
 edition = "2024"
-rust-version = "1.86"
+rust-version = "1.88"
 authors = ["MANTIS Contributors"]
 description = "Composable technical analysis and strategy engine for Rust"
 documentation = "https://docs.rs/mantis-ta"
