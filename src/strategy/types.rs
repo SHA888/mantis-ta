@@ -270,8 +270,7 @@ impl StrategyBuilder {
 fn validate_condition_node(node: &ConditionNode, depth: usize) -> crate::types::Result<()> {
     if depth > MAX_NESTING_DEPTH {
         return Err(crate::types::MantisError::StrategyValidation(format!(
-            "Condition nesting exceeds maximum depth of {}",
-            MAX_NESTING_DEPTH
+            "Condition nesting exceeds maximum depth of {MAX_NESTING_DEPTH}"
         )));
     }
     if let ConditionNode::Group(group) = node {
@@ -280,8 +279,7 @@ fn validate_condition_node(node: &ConditionNode, depth: usize) -> crate::types::
         };
         if children.len() > MAX_CONDITIONS_PER_GROUP {
             return Err(crate::types::MantisError::StrategyValidation(format!(
-                "Condition group exceeds maximum of {} conditions",
-                MAX_CONDITIONS_PER_GROUP
+                "Condition group exceeds maximum of {MAX_CONDITIONS_PER_GROUP} conditions"
             )));
         }
         for child in children {
