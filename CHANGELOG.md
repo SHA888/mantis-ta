@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3] — 2026-03-25
+
+### Changed
+- **Rust upgrade**: Updated MSRV from 1.86 to 1.88 for cargo-tarpaulin compatibility
+- **CI toolchain**: Upgraded GitHub Actions to use Rust 1.88
+- **Code coverage**: Added cargo-tarpaulin integration with Codecov badge
+- **Dependencies**: Updated to latest criterion 0.8.2 (requires Rust 1.88)
+
+### Fixed
+- **Clippy warnings**: Fixed 33 clippy warnings for Rust 1.88 compatibility
+  - Fixed `uninlined_format_args` warnings in indicator_ref.rs and types.rs
+  - Fixed `collapsible_if` warnings in evaluator.rs
+- **Formatting**: Applied rustfmt to fix line breaks in collapsed if-let statements
+- **cargo-tarpaulin**: Fixed dependency conflicts with cargo-platform 0.3.2 and gimli 0.33.0
+
+### Added
+- **Code coverage badge**: Added Codecov coverage badge to README (74.92% coverage)
+- **Coverage integration**: Full CI coverage pipeline with XML report generation
+
+## [0.5.2] — 2026-03-25
+
+### Changed
+- **Rust upgrade**: Updated MSRV from 1.85 to 1.86 for criterion 0.8.2 compatibility
+- **Dependencies**: Upgraded criterion to 0.8.2 with latest benchmarking features
+
+## [0.5.1] — 2026-03-25
+
+### Changed
+- **Rust edition**: Upgraded from edition 2021 to 2024
+- **MSRV**: Updated minimum supported Rust version to 1.85
+
+### Added
+- **Dependabot**: Comprehensive dependency monitoring for Rust crates and GitHub Actions
+- **Security policy**: SECURITY.md with vulnerability reporting guidelines
+- **Issue templates**: Security vulnerability reporting template
+
 ## [0.5.0] — 2026-03-03
 
 ### Added
