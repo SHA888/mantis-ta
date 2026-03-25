@@ -129,13 +129,17 @@ impl ADX {
 
                 self.di_history.push(dx);
 
-                if self.bar_count == self.period * 2 {
-                    let adx_sum: f64 = self.di_history.iter().sum();
-                    self.adx = Some(adx_sum / self.period as f64);
-                } else if self.bar_count > self.period * 2 {
-                    let prev_adx = self.adx.unwrap_or(0.0);
-                    self.adx =
-                        Some((prev_adx * (self.period - 1) as f64 + dx) / self.period as f64);
+                match self.bar_count.cmp(&(self.period * 2)) {
+                    std::cmp::Ordering::Equal => {
+                        let adx_sum: f64 = self.di_history.iter().sum();
+                        self.adx = Some(adx_sum / self.period as f64);
+                    }
+                    std::cmp::Ordering::Greater => {
+                        let prev_adx = self.adx.unwrap_or(0.0);
+                        self.adx =
+                            Some((prev_adx * (self.period - 1) as f64 + dx) / self.period as f64);
+                    }
+                    std::cmp::Ordering::Less => {}
                 }
             }
         }
