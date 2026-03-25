@@ -314,7 +314,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ---
 
-## v0.5.1 — Rust Upgrade
+## v0.5.3 — Rust Upgrade
 
 - [x] Set `edition = "2024"` in all workspace/crate Cargo.toml files
 - [x] Set `rust-version = "1.85"` (MSRV) in root Cargo.toml
