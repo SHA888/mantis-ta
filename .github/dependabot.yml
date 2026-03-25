@@ -1,0 +1,61 @@
+version: 2
+updates:
+  # Enable version updates for Rust crates
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "SHA888"
+    assignees:
+      - "SHA888"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "rust"
+    # Allow both patch and minor updates automatically
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Ignore major version updates for critical dependencies
+      - dependency-name: "serde"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "serde_json"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "thiserror"
+        update-types: ["version-update:semver-major"]
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "SHA888"
+    assignees:
+      - "SHA888"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # Allow patch and minor updates for actions
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Ignore major version updates for critical actions
+      - dependency-name: "actions/checkout"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "actions/cache"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "dtolnay/rust-toolchain"
+        update-types: ["version-update:semver-major"]
