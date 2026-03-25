@@ -10,9 +10,9 @@
 
 #[cfg(feature = "backtest")]
 fn main() {
-    use mantis_ta::backtest::{backtest, BacktestConfig, ExecutionModel};
+    use mantis_ta::backtest::{BacktestConfig, ExecutionModel, backtest};
     use mantis_ta::strategy::indicator_ref::IndicatorRef;
-    use mantis_ta::strategy::{Strategy, StopLoss};
+    use mantis_ta::strategy::{StopLoss, Strategy};
     use mantis_ta::types::{Candle, Timeframe};
     // Load sample data (5 years of daily data)
     let candles = load_sample_candles();
@@ -30,8 +30,8 @@ fn main() {
     // Configure backtest with realistic costs
     let config = BacktestConfig {
         initial_capital: 100_000.0,
-        commission_pct: 0.001,    // 0.1% per trade
-        slippage_pct: 0.001,      // 0.1% slippage
+        commission_pct: 0.001, // 0.1% per trade
+        slippage_pct: 0.001,   // 0.1% slippage
         execution: ExecutionModel::NextBarOpen,
         ..Default::default()
     };
@@ -44,7 +44,10 @@ fn main() {
     println!("=== BACKTEST RESULTS ===\n");
     println!("Starting Capital:  ${:.2}", result.starting_cash);
     println!("Ending Capital:    ${:.2}", result.ending_cash);
-    println!("Total Return:      {:.2}%\n", result.metrics.total_return * 100.0);
+    println!(
+        "Total Return:      {:.2}%\n",
+        result.metrics.total_return * 100.0
+    );
 
     println!("=== PERFORMANCE METRICS ===\n");
     if let Some(cagr) = result.metrics.cagr {
@@ -56,8 +59,14 @@ fn main() {
     if let Some(sharpe) = result.metrics.sharpe_ratio {
         println!("Sharpe Ratio:      {:.2}", sharpe);
     }
-    println!("Max Drawdown:      {:.2}%", result.metrics.max_drawdown * 100.0);
-    println!("Win Rate:          {:.2}%", result.metrics.win_rate.unwrap_or(0.0) * 100.0);
+    println!(
+        "Max Drawdown:      {:.2}%",
+        result.metrics.max_drawdown * 100.0
+    );
+    println!(
+        "Win Rate:          {:.2}%",
+        result.metrics.win_rate.unwrap_or(0.0) * 100.0
+    );
     if let Some(pf) = result.metrics.profit_factor {
         println!("Profit Factor:     {:.2}", pf);
     }
@@ -110,7 +119,10 @@ fn main() {
     // Display walk-forward results
     if let Some(wf) = &result.walk_forward {
         println!("\n=== WALK-FORWARD VALIDATION (70/30 split) ===\n");
-        println!("Train Return: {:.2}%", wf.train_metrics.total_return * 100.0);
+        println!(
+            "Train Return: {:.2}%",
+            wf.train_metrics.total_return * 100.0
+        );
         println!("Test Return:  {:.2}%", wf.test_metrics.total_return * 100.0);
         let degradation = (wf.test_metrics.total_return - wf.train_metrics.total_return) * 100.0;
         println!("Degradation:  {:.2}%", degradation);
@@ -127,7 +139,7 @@ fn main() {
 #[cfg(feature = "backtest")]
 fn load_sample_candles() -> Vec<mantis_ta::types::Candle> {
     use mantis_ta::types::Candle;
-    
+
     // Generate synthetic daily data for demonstration
     let mut candles = Vec::new();
     let mut price = 100.0;

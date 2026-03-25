@@ -1,17 +1,17 @@
 use mantis_ta::indicators::momentum::Stochastic;
 use mantis_ta::indicators::volatility::ATR;
 use mantis_ta::indicators::{
-    BollingerBands, Indicator, PivotPoints, VolumeSMA, EMA, MACD, OBV, RSI, SMA,
+    BollingerBands, EMA, Indicator, MACD, OBV, PivotPoints, RSI, SMA, VolumeSMA,
 };
 use mantis_ta::types::Candle;
-use rand::rngs::StdRng;
 use rand::prelude::*;
+use rand::rngs::StdRng;
 
 fn random_candles(len: usize, seed: u64) -> Vec<Candle> {
     let mut rng = StdRng::seed_from_u64(seed);
     let mut price: f64 = 100.0;
     let mut out = Vec::with_capacity(len);
-    
+
     for i in 0..len {
         let drift: f64 = rng.random::<f64>() * 1.0 - 0.5; // -0.5 to 0.5
         let shock: f64 = rng.random::<f64>() * 1.0 - 0.5; // -0.5 to 0.5

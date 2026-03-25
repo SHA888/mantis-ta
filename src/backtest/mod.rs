@@ -59,7 +59,10 @@ fn compute_metrics(
     // Validate equity curve values are finite
     for (i, &(_, eq)) in equity_curve.iter().enumerate() {
         if !eq.is_finite() {
-            eprintln!("Warning: equity curve contains non-finite value at index {}", i);
+            eprintln!(
+                "Warning: equity curve contains non-finite value at index {}",
+                i
+            );
         }
     }
 
@@ -887,7 +890,7 @@ pub fn backtest(
         let mut cfg = config;
         cfg.commission_pct *= factor;
         cfg.slippage_pct *= factor;
-        
+
         // Validate scaled config stays within bounds
         if cfg.commission_pct > 1.0 || cfg.slippage_pct > 1.0 {
             base.warnings.push(format!(
@@ -896,7 +899,7 @@ pub fn backtest(
             ));
             continue;
         }
-        
+
         match backtest_once(&strategy, candles, cfg) {
             Ok(res) => {
                 sensitivity.push(ParameterSensitivity {
@@ -920,14 +923,18 @@ pub fn backtest(
     let walk_forward = if split_index >= 2 && candles.len() - split_index >= 2 {
         let train = &candles[..split_index];
         let test = &candles[split_index..];
-        match (backtest_once(&strategy, train, config), backtest_once(&strategy, test, config)) {
+        match (
+            backtest_once(&strategy, train, config),
+            backtest_once(&strategy, test, config),
+        ) {
             (Ok(train_res), Ok(test_res)) => Some(WalkForwardResult {
                 split_index,
                 train_metrics: train_res.metrics,
                 test_metrics: test_res.metrics,
             }),
             (Err(e), _) | (_, Err(e)) => {
-                base.warnings.push(format!("Walk-forward validation failed: {}", e));
+                base.warnings
+                    .push(format!("Walk-forward validation failed: {}", e));
                 None
             }
         }
@@ -948,8 +955,8 @@ pub fn backtest(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::strategy::indicator_ref::IndicatorRef;
     use crate::strategy::StopLoss;
+    use crate::strategy::indicator_ref::IndicatorRef;
 
     fn make_candles(prices: &[f64]) -> Vec<Candle> {
         prices
@@ -1058,7 +1065,7 @@ mod tests {
         // High prices with low capital
         let candles = make_candles(&[100.0, 200.0, 200.0, 100.0]);
         let config = BacktestConfig {
-            initial_capital: 1000.0,  // Only $1000
+            initial_capital: 1000.0, // Only $1000
             ..Default::default()
         };
         let res = backtest(strategy, &candles, config).unwrap();
@@ -1067,7 +1074,7 @@ mod tests {
         // qty = 1000 / (100 * 1.001) ≈ 9.99 → floor to 9
         if !res.trades.is_empty() {
             assert!(res.trades[0].qty <= 10.0);
-            assert!(res.ending_cash >= 0.0);  // Never go negative
+            assert!(res.ending_cash >= 0.0); // Never go negative
         }
     }
 
@@ -1095,7 +1102,7 @@ mod tests {
         // Run with commission
         let config_with_comm = BacktestConfig {
             initial_capital: 100_000.0,
-            commission_pct: 0.01,  // 1% per trade
+            commission_pct: 0.01, // 1% per trade
             ..Default::default()
         };
         let res_with_comm = backtest(strategy, &candles, config_with_comm).unwrap();
@@ -1128,7 +1135,7 @@ mod tests {
         // Run with slippage
         let config_with_slip = BacktestConfig {
             initial_capital: 100_000.0,
-            slippage_pct: 0.01,  // 1% slippage
+            slippage_pct: 0.01, // 1% slippage
             ..Default::default()
         };
         let res_with_slip = backtest(strategy, &candles, config_with_slip).unwrap();
@@ -1140,8 +1147,8 @@ mod tests {
     #[test]
     fn backtest_edge_case_never_trades() {
         // Strategy that never triggers
-        let entry = IndicatorRef::sma(1).is_above(100.0);  // Never true
-        let exit = IndicatorRef::sma(1).is_below(0.0);     // Never true
+        let entry = IndicatorRef::sma(1).is_above(100.0); // Never true
+        let exit = IndicatorRef::sma(1).is_below(0.0); // Never true
         let strategy = Strategy::builder("never_trade")
             .entry(entry)
             .exit(exit)
@@ -1153,14 +1160,14 @@ mod tests {
         let res = backtest(strategy, &candles, BacktestConfig::default()).unwrap();
 
         assert_eq!(res.trades.len(), 0);
-        assert_eq!(res.ending_cash, 100_000.0);  // No trades, no change
+        assert_eq!(res.ending_cash, 100_000.0); // No trades, no change
     }
 
     #[test]
     fn backtest_edge_case_always_in_position() {
         // Strategy that enters immediately and never exits
-        let entry = IndicatorRef::sma(1).is_above(0.0);    // Always true
-        let exit = IndicatorRef::sma(1).is_below(-100.0);  // Never true
+        let entry = IndicatorRef::sma(1).is_above(0.0); // Always true
+        let exit = IndicatorRef::sma(1).is_below(-100.0); // Never true
         let strategy = Strategy::builder("always_in")
             .entry(entry)
             .exit(exit)

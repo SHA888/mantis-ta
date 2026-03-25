@@ -1,5 +1,5 @@
 use mantis_ta::indicators::{
-    BollingerBands, Indicator, PivotPoints, Stochastic, VolumeSMA, ATR, EMA, MACD, OBV, RSI, SMA,
+    ATR, BollingerBands, EMA, Indicator, MACD, OBV, PivotPoints, RSI, SMA, Stochastic, VolumeSMA,
 };
 use mantis_ta::types::{BollingerOutput, MacdOutput, PivotOutput, StochasticOutput};
 
