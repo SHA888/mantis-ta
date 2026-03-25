@@ -314,6 +314,22 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 ---
 
+## v0.5.1 — Rust Upgrade
+
+- [x] Set `edition = "2024"` in all workspace/crate Cargo.toml files
+- [x] Set `rust-version = "1.85"` (MSRV) in root Cargo.toml
+- [x] Run `cargo fix --edition` to auto-migrate code
+- [x] Resolve remaining compiler warnings/errors
+  - `unsafe extern` blocks
+  - `#[unsafe(no_mangle)]` attributes
+  - `unsafe {}` blocks inside `unsafe fn`
+  - `r#gen` if `gen` used as identifier
+- [x] Run `cargo clippy` and `cargo test` on clean build
+- [x] Update CI toolchain pin (e.g., `rust-toolchain.toml`) to >= 1.85
+- [x] Update docs and README references to edition/MSRV
+
+---
+
 ## v0.6.0 — Tier 2 Indicators: Batch B (7 indicators)
 
 > Completes Tier 2. ADX from v0.5.0 now enables `mantis-regime` to
