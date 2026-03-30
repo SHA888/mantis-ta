@@ -46,7 +46,7 @@ jobs:
         run: cargo install cargo-tarpaulin && cargo tarpaulin --all-features --out Xml --output-dir target/coverage
 
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           file: target/coverage/cobertura.xml
           fail_ci_if_error: false
