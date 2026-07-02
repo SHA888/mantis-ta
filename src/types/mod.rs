@@ -107,6 +107,17 @@ pub struct AdxOutput {
     pub adx: f64,
 }
 
+/// Ichimoku Cloud output values.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct IchimokuOutput {
+    pub tenkan_sen: f64,
+    pub kijun_sen: f64,
+    pub senkou_span_a: f64,
+    pub senkou_span_b: f64,
+    pub chikou_span: f64,
+}
+
 /// Pivot points output values.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq)]

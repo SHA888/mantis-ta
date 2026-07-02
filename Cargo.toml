@@ -39,6 +39,10 @@ name = "indicators"
 harness = false
 
 [[bench]]
+name = "batch_b_indicators"
+harness = false
+
+[[bench]]
 name = "strategy_eval"
 harness = false
 required-features = ["strategy"]
