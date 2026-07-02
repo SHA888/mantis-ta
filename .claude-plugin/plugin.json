@@ -1,0 +1,8 @@
+{
+  "name": "mantis-ta",
+  "version": "0.5.3",
+  "description": "Composable technical analysis and strategy engine in pure Rust",
+  "skills": [
+    "./skills/"
+  ]
+}

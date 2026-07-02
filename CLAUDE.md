@@ -83,6 +83,8 @@ Every indicator follows this structure:
 - Pre-commit hooks mirror CI checks (see `.pre-commit-config.yaml`)
 - MSRV: Rust 1.75+
 - Dual license: MIT OR Apache-2.0
+- **No `Co-Authored-By:` trailers in commit messages.** Applies to all assistant-generated commits (Claude Code or any other AI tool). Commit attribution stays with the human author.
+- **English-only for tracked files.** All `Plans.md` content (headers, table columns, task descriptions, status markers) must be in English — e.g. `cc:done` / `cc:wip`, not Japanese equivalents. All harness output and documentation must be in English.
 
 ## Adding a New Indicator
 

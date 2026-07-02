@@ -2,3 +2,12 @@
 .windsurf
 /target/
 .rustc_info.json
+
+# Harness-generated artifacts
+/out/
+
+# Harness runtime/session state (local-only)
+/.claude/*
+!/.claude/rules/
+!/.claude/output-styles/
+/.harness-mem/

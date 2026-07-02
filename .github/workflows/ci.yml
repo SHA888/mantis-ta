@@ -33,6 +33,14 @@ jobs:
       - name: Clippy
         run: cargo clippy -- -D warnings
 
+      - name: Cargo Deny (licenses, bans, advisories, sources)
+        uses: EmbarkStudios/cargo-deny-action@v2
+
+      - name: Cargo Audit
+        uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Test
         run: cargo test
 

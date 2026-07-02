@@ -13,3 +13,15 @@ repos:
         language: system
         types: [rust]
         pass_filenames: false
+      - id: cargo-deny
+        name: cargo deny check
+        entry: cargo deny check
+        language: system
+        files: ^(Cargo\.lock|Cargo\.toml|deny\.toml)$
+        pass_filenames: false
+      - id: cargo-audit
+        name: cargo audit
+        entry: cargo audit
+        language: system
+        files: ^(Cargo\.lock|Cargo\.toml)$
+        pass_filenames: false
