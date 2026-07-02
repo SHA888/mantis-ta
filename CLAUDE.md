@@ -37,6 +37,7 @@ python fixtures/generate_references.py
 ### Core Traits (`src/indicators/mod.rs`)
 
 All indicators implement the `Indicator` trait:
+
 - `next(&mut self, candle: &Candle) -> Option<Self::Output>` — streaming, O(1)
 - `calculate(&self, candles: &[Candle]) -> Vec<Option<Self::Output>>` — batch (default impl loops `next()`)
 - `warmup_period(&self) -> usize` — returns `None` during warmup, then `Some(output)`
@@ -54,6 +55,7 @@ All indicators implement the `Indicator` trait:
 ### Indicator Implementation Pattern
 
 Every indicator follows this structure:
+
 1. Struct with `period`, internal state, and `RingBuf` for windowed data
 2. Private `update(value: f64) -> Option<Output>` with `#[inline]`
 3. `Indicator` trait impl: `next()` extracts `candle.close` (or relevant fields) and calls `update()`
