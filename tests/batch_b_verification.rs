@@ -1,4 +1,4 @@
-use mantis_ta::indicators::{Ichimoku, Indicator};
+use mantis_ta::indicators::{Ichimoku, Indicator, ParabolicSar};
 use mantis_ta::types::Candle;
 
 fn create_ohlc_candles(highs: &[f64], lows: &[f64], closes: &[f64]) -> Vec<Candle> {
@@ -20,6 +20,22 @@ fn trending_candles(n: usize) -> Vec<Candle> {
     let closes: Vec<f64> = (0..n).map(|i| 100.0 + i as f64).collect();
     let highs: Vec<f64> = closes.iter().map(|c| c + 1.0).collect();
     let lows: Vec<f64> = closes.iter().map(|c| c - 1.0).collect();
+    create_ohlc_candles(&highs, &lows, &closes)
+}
+
+fn up_then_down_candles(up_n: usize, down_n: usize) -> Vec<Candle> {
+    let mut closes = Vec::with_capacity(up_n + down_n);
+    let mut price = 100.0;
+    for _ in 0..up_n {
+        price += 1.0;
+        closes.push(price);
+    }
+    for _ in 0..down_n {
+        price -= 2.0;
+        closes.push(price);
+    }
+    let highs: Vec<f64> = closes.iter().map(|c| c + 0.5).collect();
+    let lows: Vec<f64> = closes.iter().map(|c| c - 0.5).collect();
     create_ohlc_candles(&highs, &lows, &closes)
 }
 
@@ -90,4 +106,60 @@ fn verify_ichimoku_reset_functionality() {
 
     ichimoku.reset();
     assert_eq!(ichimoku.next(&candles[0]), None);
+}
+
+#[test]
+fn verify_parabolic_sar_warmup_and_bounds() {
+    let candles = trending_candles(60);
+    let sar = ParabolicSar::new(0.02, 0.02, 0.2);
+    let outputs = sar.calculate(&candles);
+
+    assert_eq!(sar.warmup_period(), 2);
+    assert!(outputs[0].is_none());
+    assert!(outputs[1].is_some());
+    assert!(outputs.iter().skip(1).all(|v| v.is_some()));
+
+    // Sustained uptrend: SAR must trail below price (never above the bar's low).
+    for (out, candle) in outputs.iter().zip(candles.iter()).skip(1) {
+        let v = out.unwrap();
+        assert!(v.is_finite());
+        assert!(v <= candle.low);
+    }
+}
+
+#[test]
+fn verify_parabolic_sar_reversal_flips_side() {
+    let candles = up_then_down_candles(30, 30);
+    let outputs = ParabolicSar::new(0.02, 0.02, 0.2).calculate(&candles);
+
+    // Early in the uptrend leg, SAR trails below price.
+    let early = outputs[5].unwrap();
+    assert!(early <= candles[5].low);
+
+    // After a steep, sustained decline, SAR must have flipped above price.
+    let last = outputs.last().unwrap().unwrap();
+    assert!(last >= candles.last().unwrap().high);
+}
+
+#[test]
+fn verify_parabolic_sar_streaming_matches_batch() {
+    let candles = up_then_down_candles(20, 20);
+    let batch = ParabolicSar::new(0.02, 0.02, 0.2).calculate(&candles);
+
+    let mut streaming_sar = ParabolicSar::new(0.02, 0.02, 0.2);
+    let streaming: Vec<Option<f64>> = candles.iter().map(|c| streaming_sar.next(c)).collect();
+
+    assert_eq!(batch, streaming);
+}
+
+#[test]
+fn verify_parabolic_sar_reset_functionality() {
+    let candles = trending_candles(10);
+    let mut sar = ParabolicSar::new(0.02, 0.02, 0.2);
+
+    assert!(sar.next(&candles[0]).is_none());
+    assert!(sar.next(&candles[1]).is_some());
+
+    sar.reset();
+    assert_eq!(sar.next(&candles[0]), None);
 }

@@ -66,7 +66,7 @@ pub mod volume;
 pub use momentum::{CCI, ROC, RSI, Stochastic, WilliamsR};
 pub use obv::OBV;
 pub use support_resistance::PivotPoints;
-pub use trend::{ADX, DEMA, EMA, Ichimoku, MACD, SMA, TEMA, WMA};
+pub use trend::{ADX, DEMA, EMA, Ichimoku, MACD, ParabolicSar, SMA, TEMA, WMA};
 pub use volatility::{ATR, BollingerBands, StdDev};
 pub use volume::VolumeSMA;
 
