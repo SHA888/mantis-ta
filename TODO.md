@@ -336,7 +336,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 > implement rule-based regime detection (ADX > 25 = trending, etc.).
 
 - [x] Ichimoku Cloud — `IchimokuOutput`
-- [ ] Parabolic SAR — `f64`
+- [x] Parabolic SAR — `f64`
 - [ ] MFI (Money Flow Index) — `f64`
 - [ ] Keltner Channels — `KeltnerOutput`
 - [ ] VWAP (Volume Weighted Average Price) — `f64`
