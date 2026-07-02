@@ -97,8 +97,11 @@ impl ParabolicSar {
                 self.ep = low.min(self.first_low);
             }
             self.af = self.af_start;
-            self.prev2_high = self.first_high;
-            self.prev2_low = self.first_low;
+            // The first recurrence step clamps only against this bar (not the
+            // seed bar), matching TA-Lib's bootstrap: prev2 == prev1 here so
+            // the two-bar clamp below degenerates to a one-bar clamp.
+            self.prev2_high = high;
+            self.prev2_low = low;
             self.prev1_high = high;
             self.prev1_low = low;
             return Some(self.sar);

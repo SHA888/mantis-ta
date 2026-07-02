@@ -1,5 +1,6 @@
 use mantis_ta::indicators::{
-    ATR, BollingerBands, EMA, Indicator, MACD, OBV, PivotPoints, RSI, SMA, Stochastic, VolumeSMA,
+    ATR, BollingerBands, EMA, Indicator, MACD, OBV, ParabolicSar, PivotPoints, RSI, SMA,
+    Stochastic, VolumeSMA,
 };
 use mantis_ta::types::{BollingerOutput, MacdOutput, PivotOutput, StochasticOutput};
 
@@ -185,4 +186,12 @@ fn verify_pivot_points() {
         assert_close(o.s2, r.s2, "s2", i);
         assert_close(o.s3, r.s3, "s3", i);
     }
+}
+
+#[test]
+fn verify_sar() {
+    let candles = load_candles("market_data/spy_daily_5y.csv").unwrap();
+    let reference = load_reference_series("reference/sar.json").unwrap();
+    let out: Vec<Option<f64>> = ParabolicSar::new(0.02, 0.02, 0.2).calculate(&candles);
+    assert_series(&out, &reference, "sar");
 }
