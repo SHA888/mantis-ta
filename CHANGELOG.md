@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] — 2026-07-02
+
+### Added
+- **Ichimoku Cloud indicator**: New `Ichimoku` indicator (tenkan-sen, kijun-sen, senkou span A/B, chikou span) via streaming O(1) sliding high/low windows. Exposed as `IchimokuOutput`. No TA-Lib equivalent exists; verified via self-consistency tests (bounds, formula, streaming/batch equivalence, reset).
+
+### Fixed
+- **CI code coverage**: `cargo-tarpaulin` install now uses a prebuilt binary (`taiki-e/install-action`) instead of compiling from source, fixing a break caused by tarpaulin's dependency chain requiring a newer rustc than the pinned CI toolchain (1.88).
+- **CI cargo-audit**: Replaced deprecated `rustsec/audit-check` with `taiki-e/install-action` + `cargo audit`.
+- **Codecov action**: Renamed `file` input to `files` for forward-compatibility with `codecov-action@v7`.
+
+### Changed
+- **Dependencies**: Routine maintenance updates (`codecov-action` v4→v7, `regex-syntax`, `clap`, `itoa`, `once_cell`, `syn`, `bumpalo`, `unicode-ident`, `clap_lex`, `anstyle`, `portable-atomic-util`).
+
 ## [0.5.3] — 2026-03-25
 
 ### Changed

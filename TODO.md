@@ -335,7 +335,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 > Completes Tier 2. ADX from v0.5.0 now enables `mantis-regime` to
 > implement rule-based regime detection (ADX > 25 = trending, etc.).
 
-- [ ] Ichimoku Cloud — `IchimokuOutput`
+- [x] Ichimoku Cloud — `IchimokuOutput`
 - [ ] Parabolic SAR — `f64`
 - [ ] MFI (Money Flow Index) — `f64`
 - [ ] Keltner Channels — `KeltnerOutput`

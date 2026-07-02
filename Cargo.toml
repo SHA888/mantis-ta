@@ -1,6 +1,6 @@
 [package]
 name = "mantis-ta"
-version = "0.5.3"
+version = "0.6.1"
 edition = "2024"
 rust-version = "1.88"
 authors = ["MANTIS Contributors"]
