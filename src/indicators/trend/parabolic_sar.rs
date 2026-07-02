@@ -112,12 +112,12 @@ impl ParabolicSar {
         }
 
         if self.is_uptrend && low < new_sar {
-            new_sar = self.ep;
+            new_sar = self.ep.max(high).max(self.prev1_high);
             self.is_uptrend = false;
             self.ep = low;
             self.af = self.af_start;
         } else if !self.is_uptrend && high > new_sar {
-            new_sar = self.ep;
+            new_sar = self.ep.min(low).min(self.prev1_low);
             self.is_uptrend = true;
             self.ep = high;
             self.af = self.af_start;

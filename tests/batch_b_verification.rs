@@ -163,3 +163,24 @@ fn verify_parabolic_sar_reset_functionality() {
     sar.reset();
     assert_eq!(sar.next(&candles[0]), None);
 }
+
+#[test]
+fn verify_parabolic_sar_reversal_clamps_to_current_bar_range() {
+    // Bar 3 triggers an uptrend->downtrend reversal. The new SAR must be
+    // clamped to at least the reversal bar's own high (and the prior bar's
+    // high), matching TA-Lib's `sar = max(ep, todayHigh, yesterdayHigh)` —
+    // it must never sit inside the bar's own high/low range.
+    let candles = create_ohlc_candles(
+        &[100.0, 102.0, 150.0],
+        &[90.0, 92.0, 80.0],
+        &[95.0, 97.0, 100.0],
+    );
+    let outputs = ParabolicSar::new(0.02, 0.02, 0.2).calculate(&candles);
+
+    let reversal_sar = outputs[2].unwrap();
+    assert!(
+        reversal_sar >= candles[2].high,
+        "SAR {reversal_sar} must be at or above the reversal bar's high {}",
+        candles[2].high
+    );
+}
