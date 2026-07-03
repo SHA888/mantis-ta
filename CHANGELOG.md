@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.5] — 2026-07-03
+
+### Added
+- **VWAP (Volume Weighted Average Price) indicator**: New `VWAP` streaming volume indicator computing a rolling-window volume-weighted average of typical price (`(high + low + close) / 3`) over the last `period` bars. TA-Lib has no native VWAP function — conventional VWAP is session-anchored, but `Candle` carries no session boundary, so this implementation uses a fixed rolling window instead (matching the convention of `ATR`/`VolumeSMA`). `warmup_period() == period`. Verified via self-consistency/property tests (bounds, closed-form checks under flat price/constant volume, streaming/batch equivalence, reset), matching the precedent set by Ichimoku and Keltner Channels.
+
 ## [0.6.4] — 2026-07-03
 
 ### Added
