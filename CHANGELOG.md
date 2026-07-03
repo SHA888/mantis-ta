@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.4] — 2026-07-03
+
+### Added
+- **Keltner Channels indicator**: New `KeltnerChannels` streaming volatility indicator composing the existing `EMA` (middle band) and `ATR` (band width) indicators, matching the `MACD` precedent for composite indicators, with `KeltnerOutput { upper, middle, lower }`. `warmup_period()` is `max(ema_period, atr_period)` since both sub-indicators warm up in parallel off the same candle stream. No native TA-Lib function exists for Keltner Channels, so correctness is verified via self-consistency/property tests (warmup bounds, closed-form band width on flat synthetic input, streaming/batch equivalence, reset), matching the precedent set by Ichimoku.
+
 ## [0.6.3] — 2026-07-03
 
 ### Added

@@ -338,7 +338,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 - [x] Ichimoku Cloud — `IchimokuOutput`
 - [x] Parabolic SAR — `f64`
 - [x] MFI (Money Flow Index) — `f64`
-- [ ] Keltner Channels — `KeltnerOutput`
+- [x] Keltner Channels — `KeltnerOutput`
 - [ ] VWAP (Volume Weighted Average Price) — `f64`
 - [ ] Accumulation/Distribution Line — `f64`
 - [ ] Donchian Channels — `DonchianOutput`
