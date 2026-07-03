@@ -20,7 +20,7 @@ Product contract for indicator correctness: [SPEC.md](./SPEC.md) §4.2 Indicator
 | 6.2 | Parabolic SAR (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:done [58fd6ca] |
 | 6.3 | MFI — Money Flow Index (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:done [519c647] |
 | 6.4 | Keltner Channels (`KeltnerOutput`) | Satisfies SPEC §4.2 checklist | - | cc:done [fbba1b5] |
-| 6.5 | VWAP — Volume Weighted Average Price (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:TODO |
+| 6.5 | VWAP — Volume Weighted Average Price (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:done [74e3fa9] |
 | 6.6 | Accumulation/Distribution Line (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:TODO |
 | 6.7 | Donchian Channels (`DonchianOutput`) | Satisfies SPEC §4.2 checklist | - | cc:TODO |
 | 6.8 | `IndicatorRef` convenience constructors for all Batch B indicators | Each of 6.1-6.7 has a matching `IndicatorRef` constructor; `cargo test` passes | 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7 | cc:TODO |
