@@ -1,4 +1,4 @@
-use mantis_ta::indicators::{Ichimoku, Indicator, KeltnerChannels, ParabolicSar};
+use mantis_ta::indicators::{Ichimoku, Indicator, KeltnerChannels, ParabolicSar, VWAP};
 use mantis_ta::types::Candle;
 
 fn create_ohlc_candles(highs: &[f64], lows: &[f64], closes: &[f64]) -> Vec<Candle> {
@@ -12,6 +12,26 @@ fn create_ohlc_candles(highs: &[f64], lows: &[f64], closes: &[f64]) -> Vec<Candl
             low: lows[i],
             close: closes[i],
             volume: 1_000_000.0,
+        })
+        .collect()
+}
+
+fn create_ohlcv_candles(
+    highs: &[f64],
+    lows: &[f64],
+    closes: &[f64],
+    volumes: &[f64],
+) -> Vec<Candle> {
+    highs
+        .iter()
+        .enumerate()
+        .map(|(i, &high)| Candle {
+            timestamp: i as i64 * 60_000,
+            open: closes[i],
+            high,
+            low: lows[i],
+            close: closes[i],
+            volume: volumes[i],
         })
         .collect()
 }
@@ -251,4 +271,97 @@ fn verify_keltner_reset_functionality() {
 
     kc.reset();
     assert_eq!(kc.next(&candles[0]), None);
+}
+
+#[test]
+fn verify_vwap_warmup_and_window_bounds() {
+    // VWAP is a volume-weighted average of typical price, so every output
+    // must lie within [min typical price, max typical price] of its
+    // trailing window regardless of the volume weighting.
+    let period = 10;
+    let n = 60;
+    let closes: Vec<f64> = (0..n)
+        .map(|i| 100.0 + (i as f64 * 0.37).sin() * 5.0)
+        .collect();
+    let highs: Vec<f64> = closes.iter().map(|c| c + 1.0).collect();
+    let lows: Vec<f64> = closes.iter().map(|c| c - 1.0).collect();
+    let volumes: Vec<f64> = (0..n)
+        .map(|i| 1_000.0 + (i as f64 * 37.0) % 5_000.0)
+        .collect();
+    let candles = create_ohlcv_candles(&highs, &lows, &closes, &volumes);
+
+    let vwap = VWAP::new(period);
+    let outputs = vwap.calculate(&candles);
+
+    assert!(outputs.iter().take(period - 1).all(|o| o.is_none()));
+    assert!(outputs[period - 1].is_some());
+
+    for (i, out) in outputs.iter().enumerate() {
+        let Some(v) = out else { continue };
+        assert!(v.is_finite());
+        let window = &closes[i + 1 - period..=i];
+        let min_tp = window.iter().cloned().fold(f64::INFINITY, f64::min) - 1.0;
+        let max_tp = window.iter().cloned().fold(f64::NEG_INFINITY, f64::max) + 1.0;
+        assert!(
+            *v >= min_tp && *v <= max_tp,
+            "VWAP {v} at index {i} outside window typical-price bounds [{min_tp}, {max_tp}]"
+        );
+    }
+}
+
+#[test]
+fn verify_vwap_reduces_to_typical_price_average_under_constant_volume() {
+    // When volume is constant across the window, the volume weighting
+    // cancels out and VWAP must equal the plain average of typical prices.
+    let n = 20;
+    let closes: Vec<f64> = (0..n).map(|i| 50.0 + i as f64).collect();
+    let highs: Vec<f64> = closes.iter().map(|c| c + 2.0).collect();
+    let lows: Vec<f64> = closes.iter().map(|c| c - 2.0).collect();
+    let volumes: Vec<f64> = vec![1_000.0; n];
+    let candles = create_ohlcv_candles(&highs, &lows, &closes, &volumes);
+
+    let period = 5;
+    let outputs = VWAP::new(period).calculate(&candles);
+
+    for i in (period - 1)..n {
+        let window_tp_sum: f64 = closes[i + 1 - period..=i].iter().sum();
+        let expected = window_tp_sum / period as f64;
+        assert!((outputs[i].unwrap() - expected).abs() < 1e-9);
+    }
+}
+
+#[test]
+fn verify_vwap_streaming_matches_batch() {
+    let n = 50;
+    let closes: Vec<f64> = (0..n)
+        .map(|i| 100.0 + (i as f64 * 0.21).cos() * 4.0)
+        .collect();
+    let highs: Vec<f64> = closes.iter().map(|c| c + 1.5).collect();
+    let lows: Vec<f64> = closes.iter().map(|c| c - 1.5).collect();
+    let volumes: Vec<f64> = (0..n)
+        .map(|i| 2_000.0 + (i as f64 * 53.0) % 3_000.0)
+        .collect();
+    let candles = create_ohlcv_candles(&highs, &lows, &closes, &volumes);
+
+    let mut streaming = VWAP::new(14);
+    let batch_outputs = VWAP::new(14).calculate(&candles);
+
+    for (i, candle) in candles.iter().enumerate() {
+        let streamed = streaming.next(candle);
+        assert_eq!(streamed, batch_outputs[i], "mismatch at index {i}");
+    }
+}
+
+#[test]
+fn verify_vwap_reset_functionality() {
+    let candles = trending_candles(30);
+    let mut vwap = VWAP::new(10);
+
+    for candle in &candles {
+        vwap.next(candle);
+    }
+    assert!(vwap.next(&candles[0]).is_some());
+
+    vwap.reset();
+    assert_eq!(vwap.next(&candles[0]), None);
 }
