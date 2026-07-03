@@ -90,6 +90,15 @@ pub struct BollingerOutput {
     pub lower: f64,
 }
 
+/// Keltner Channels output values.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct KeltnerOutput {
+    pub upper: f64,
+    pub middle: f64,
+    pub lower: f64,
+}
+
 /// Stochastic oscillator output values.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq)]

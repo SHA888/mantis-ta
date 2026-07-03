@@ -1,4 +1,4 @@
-use mantis_ta::indicators::{Ichimoku, Indicator, ParabolicSar};
+use mantis_ta::indicators::{Ichimoku, Indicator, KeltnerChannels, ParabolicSar};
 use mantis_ta::types::Candle;
 
 fn create_ohlc_candles(highs: &[f64], lows: &[f64], closes: &[f64]) -> Vec<Candle> {
@@ -183,4 +183,72 @@ fn verify_parabolic_sar_reversal_clamps_to_current_bar_range() {
         "SAR {reversal_sar} must be at or above the reversal bar's high {}",
         candles[2].high
     );
+}
+
+#[test]
+fn verify_keltner_warmup_and_bounds() {
+    let candles = trending_candles(60);
+    let kc = KeltnerChannels::new(20, 10, 2.0);
+    let outputs = kc.calculate(&candles);
+
+    assert!(
+        outputs
+            .iter()
+            .take(kc.warmup_period() - 1)
+            .all(|o| o.is_none())
+    );
+    assert!(outputs[kc.warmup_period() - 1].is_some());
+
+    for out in outputs.iter().flatten() {
+        assert!(out.upper.is_finite());
+        assert!(out.middle.is_finite());
+        assert!(out.lower.is_finite());
+        assert!(out.upper > out.middle);
+        assert!(out.middle > out.lower);
+    }
+}
+
+#[test]
+fn verify_keltner_bands_formula_on_flat_input() {
+    // Flat close (100) with constant high/low spread (110/90) settles to a
+    // steady-state true range of 20 (|high-low| dominates once prev_close ==
+    // close), so ATR converges to 20 and the middle band converges to close.
+    let n = 40;
+    let closes: Vec<f64> = vec![100.0; n];
+    let highs: Vec<f64> = vec![110.0; n];
+    let lows: Vec<f64> = vec![90.0; n];
+    let candles = create_ohlc_candles(&highs, &lows, &closes);
+
+    let outputs = KeltnerChannels::new(9, 9, 2.0).calculate(&candles);
+    let last = outputs.last().unwrap().unwrap();
+
+    assert!((last.middle - 100.0).abs() < 1e-9);
+    assert!((last.upper - 140.0).abs() < 1e-9);
+    assert!((last.lower - 60.0).abs() < 1e-9);
+}
+
+#[test]
+fn verify_keltner_streaming_matches_batch() {
+    let candles = trending_candles(70);
+    let mut streaming = KeltnerChannels::new(20, 10, 2.0);
+    let batch_outputs = KeltnerChannels::new(20, 10, 2.0).calculate(&candles);
+
+    for (i, candle) in candles.iter().enumerate() {
+        let streamed = streaming.next(candle);
+        assert_eq!(streamed, batch_outputs[i], "mismatch at index {i}");
+    }
+}
+
+#[test]
+fn verify_keltner_reset_functionality() {
+    let candles = trending_candles(60);
+    let mut kc = KeltnerChannels::new(20, 10, 2.0);
+
+    for candle in &candles {
+        kc.next(candle);
+    }
+    assert!(kc.next(&candles[0]).is_some());
+
+    kc.reset();
+    assert_eq!(kc.next(&candles[0]), None);
 }

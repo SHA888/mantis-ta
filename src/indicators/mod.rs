@@ -67,7 +67,7 @@ pub use momentum::{CCI, MFI, ROC, RSI, Stochastic, WilliamsR};
 pub use obv::OBV;
 pub use support_resistance::PivotPoints;
 pub use trend::{ADX, DEMA, EMA, Ichimoku, MACD, ParabolicSar, SMA, TEMA, WMA};
-pub use volatility::{ATR, BollingerBands, StdDev};
+pub use volatility::{ATR, BollingerBands, KeltnerChannels, StdDev};
 pub use volume::VolumeSMA;
 
 /// Core interface for all streaming technical indicators.
@@ -110,4 +110,4 @@ pub trait IncrementalIndicator: Indicator {
 }
 
 // Re-export common types for convenience.
-pub use crate::types::{BollingerOutput, MacdOutput, PivotOutput, StochasticOutput};
+pub use crate::types::{BollingerOutput, KeltnerOutput, MacdOutput, PivotOutput, StochasticOutput};
