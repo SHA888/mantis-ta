@@ -1,5 +1,5 @@
 use mantis_ta::indicators::{
-    ATR, BollingerBands, EMA, Indicator, MACD, OBV, ParabolicSar, PivotPoints, RSI, SMA,
+    ATR, BollingerBands, EMA, Indicator, MACD, MFI, OBV, ParabolicSar, PivotPoints, RSI, SMA,
     Stochastic, VolumeSMA,
 };
 use mantis_ta::types::{BollingerOutput, MacdOutput, PivotOutput, StochasticOutput};
@@ -194,4 +194,12 @@ fn verify_sar() {
     let reference = load_reference_series("reference/sar.json").unwrap();
     let out: Vec<Option<f64>> = ParabolicSar::new(0.02, 0.02, 0.2).calculate(&candles);
     assert_series(&out, &reference, "sar");
+}
+
+#[test]
+fn verify_mfi() {
+    let candles = load_candles("market_data/spy_daily_5y.csv").unwrap();
+    let reference = load_reference_series("reference/mfi_14.json").unwrap();
+    let out: Vec<Option<f64>> = MFI::new(14).calculate(&candles);
+    assert_series(&out, &reference, "mfi_14");
 }

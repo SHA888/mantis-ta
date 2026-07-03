@@ -1,5 +1,5 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use mantis_ta::indicators::{Ichimoku, Indicator, ParabolicSar};
+use mantis_ta::indicators::{Ichimoku, Indicator, MFI, ParabolicSar};
 use mantis_ta::types::Candle;
 
 fn generate_candles(count: usize) -> Vec<Candle> {
@@ -62,11 +62,35 @@ fn bench_parabolic_sar_batch(c: &mut Criterion) {
     });
 }
 
+fn bench_mfi_streaming(c: &mut Criterion) {
+    c.bench_function("mfi_streaming_252_bars", |b| {
+        let candles = black_box(generate_candles(252));
+        b.iter(|| {
+            let mut mfi = MFI::new(14);
+            for candle in &candles {
+                let _ = mfi.next(candle);
+            }
+        });
+    });
+}
+
+fn bench_mfi_batch(c: &mut Criterion) {
+    c.bench_function("mfi_batch_252_bars", |b| {
+        let candles = black_box(generate_candles(252));
+        let mfi = MFI::new(14);
+        b.iter(|| {
+            let _ = mfi.calculate(&candles);
+        });
+    });
+}
+
 criterion_group!(
     benches,
     bench_ichimoku_streaming,
     bench_ichimoku_batch,
     bench_parabolic_sar_streaming,
     bench_parabolic_sar_batch,
+    bench_mfi_streaming,
+    bench_mfi_batch,
 );
 criterion_main!(benches);
