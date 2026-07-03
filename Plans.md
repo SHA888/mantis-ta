@@ -18,7 +18,7 @@ Product contract for indicator correctness: [SPEC.md](./SPEC.md) §4.2 Indicator
 |------|--------------|-----|---------|--------|
 | 6.1 | Ichimoku Cloud (`IchimokuOutput`) | Satisfies SPEC §4.2 checklist (see phase note) | - | cc:done [49ed9b1] |
 | 6.2 | Parabolic SAR (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:done [58fd6ca] |
-| 6.3 | MFI — Money Flow Index (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:TODO |
+| 6.3 | MFI — Money Flow Index (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:done [519c647] |
 | 6.4 | Keltner Channels (`KeltnerOutput`) | Satisfies SPEC §4.2 checklist | - | cc:TODO |
 | 6.5 | VWAP — Volume Weighted Average Price (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:TODO |
 | 6.6 | Accumulation/Distribution Line (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:TODO |
