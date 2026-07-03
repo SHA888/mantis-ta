@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.3] — 2026-07-03
+
+### Added
+- **MFI (Money Flow Index) indicator**: New `MFI` streaming momentum oscillator computing a rolling-window ratio of positive/negative raw money flow (typical price × volume), classified by typical-price direction vs. the prior bar and excluded from both sums when flat — matching TA-Lib's own MFI semantics rather than Wilder smoothing (unlike RSI in this codebase). `warmup_period() == period + 1`, consistent with RSI's convention. Verified against a real TA-Lib fixture (`fixtures/generate_mfi_reference.py`, `mfi_14.json` over 2000 real SPY bars).
+
 ## [0.6.2] — 2026-07-02
 
 ### Added

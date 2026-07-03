@@ -16,7 +16,7 @@ Every indicator is verified against [TA-Lib](https://ta-lib.org/) reference outp
 
 ```toml
 [dependencies]
-mantis-ta = "0.6.2"
+mantis-ta = "0.6.3"
 ```
 
 ## Quick Start
