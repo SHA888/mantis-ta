@@ -16,6 +16,7 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 | **v0.4.0** | Backtesting Engine | Platform Phase 2: backtest UI can run strategies |
 | **v0.5.0** | Tier 2 Indicators — Batch A (8) | Broader strategy options for users |
 | **v0.6.0** | Tier 2 Indicators — Batch B (7) + ADX for Regime | `mantis-regime` MVP (ADX-based detection) |
+| **Backtest Rigor** *(proposed minor — placement TBD)* | Honest-reporting upgrades to the v0.4.0 backtest engine (xbt principles): cost-fantasy tagging, cost-reconciliation, return distributions, regime-conditioned edge | Platform: honest backtest reporting (cost gap, distribution shape, regime-conditional edge) |
 | **v0.7.0** | Tier 3 Indicators — Batch A (13) + Candlestick Patterns | Advanced strategies, pattern recognition |
 | **v0.8.0** | Tier 3 Indicators — Batch B (12) + Fibonacci/Pivot Variants | Full indicator catalog |
 | **v0.9.0** | Polish — Custom Indicators, ndarray, SIMD, mdBook | Community readiness |
@@ -354,6 +355,56 @@ Items marked `[ADDITION]` are recommendations beyond the current SPEC.
 
 - [ ] Add `IndicatorRef` convenience constructors for new indicators
 - [ ] Verify new indicators work in strategy builder → eval → signal flow
+
+---
+
+## Backtest Rigor & Honest Reporting (xbt principles)
+
+> **Proposed minor — version placement at maintainer's discretion** (slots as a
+> minor after v0.6.0; may precede or interleave with the indicator batches).
+> Honest-reporting upgrades to the **existing v0.4.0 backtest engine** — not a
+> new engine. Full rationale, the four scorecards, the skew-diversification
+> thesis, and the deferred items are in
+> [`docs/research-backtest-rigor.md`](docs/research-backtest-rigor.md) (the
+> distilled source of record).
+
+**A. Cost-fantasy tagging — zero cost is opt-in and labeled**
+
+- [ ] Tag every `BacktestResult` with the cost basis used (`cost_model` label; `"zero"` when all cost params are zero)
+- [ ] Warn / mark explicitly when a run is effectively cost-free (never silently presentable as realistic)
+- [ ] `proptest`: fill never more favorable than mid; slippage never negative; commission never a rebate unless a maker model is explicitly selected
+
+**B. Cost-reconciliation scorecard — realistic vs zero-cost gap**
+
+- [ ] Run the same strategy under the configured cost model AND `ZeroCost`; report the gap (return, expectancy, Sharpe, win rate) as a first-class result section
+- [ ] Golden test: the reconciliation gap is non-zero under non-trivial costs and exactly zero under `ZeroCost`
+
+**C. Return distributions — not a single scalar**
+
+- [ ] Add skew + kurtosis of the return series to `BacktestMetrics`
+- [ ] Optional export of the full per-trade return distribution
+- [ ] Test: known synthetic return series reproduces textbook skew/kurtosis
+
+**D. Regime-conditional edge — as a lens**
+
+- [ ] `BacktestConfig` accepts an optional per-bar regime label (supplied, or derived from ADX + realized-vol percentile)
+- [ ] Metrics conditioned on regime (edge per regime), so regime-dependence vs curve-fit is visible
+- [ ] Classifier stays in `mantis-regime`; the backtest only *conditions on* a supplied regime series
+
+**E. Directional accuracy (metrics-layer add)**
+
+- [ ] Add a directional-accuracy metric to `BacktestMetrics`: signal vs realized forward-return sign agreement (hit rate)
+- [ ] Report independently of P&L, so a right-direction/wrong-sizing strategy is still visible
+- [ ] Test: synthetic series with known forward returns yields the expected accuracy
+
+> **Scorecard coverage.** The doc's four scorecards map to these items as:
+> 1 → **E** (directional accuracy), 2 → **C** (exit/skew via distributions),
+> 3 → **D** (regime-conditional edge), 4 → **B** (cost reconciliation). **A** is
+> the enabling mechanism (cost-fantasy tagging) behind scorecard 4.
+
+**Deferred (documented, not built now — see the doc):** `Bar<Decision>`/`Bar<Resolved>` typestate lookahead (apply only at a v1.0 API break), integer/newtype money (stays float-based — a general TA lib), multi-sleeve portfolio / covariance sizing (YAGNI until a real strategy book exists; would layer *above* mantis-ta).
+
+**DoD (each item):** `fmt --check` clean, `clippy -D warnings` clean, unit + property tests green, Rustdoc on new public items, `CHANGELOG.md` entry (public-API additions are minor-version).
 
 ---
 
