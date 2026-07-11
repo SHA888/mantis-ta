@@ -18,6 +18,21 @@ updates:
     labels:
       - "dependencies"
       - "rust"
+    # Collapse routine bumps into grouped PRs instead of one-per-crate.
+    # Major updates are excluded here, so they still arrive as individual PRs
+    # (and criticals are ignored below), keeping review attention where it matters.
+    groups:
+      # All dev/test/build tooling (criterion & its transitive deps) in one PR.
+      dev-dependencies:
+        applies-to: version-updates
+        dependency-type: "development"
+      # Runtime deps: batch low-risk minor/patch together; majors stay separate.
+      production-minor-patch:
+        applies-to: version-updates
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
     # Allow both patch and minor updates automatically
     allow:
       - dependency-type: "all"
@@ -48,6 +63,15 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+    # Collapse all minor/patch action bumps into a single PR; majors stay separate.
+    groups:
+      github-actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
     # Allow patch and minor updates for actions
     allow:
       - dependency-type: "all"
