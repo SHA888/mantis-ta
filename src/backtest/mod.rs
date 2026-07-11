@@ -644,13 +644,13 @@ fn validate_candles(candles: &[Candle]) -> Result<()> {
         }
 
         // Validate timestamp ordering
-        if let Some(prev_ts) = prev_timestamp {
-            if candle.timestamp <= prev_ts {
-                return Err(MantisError::BacktestError(format!(
-                    "candle {} has non-increasing timestamp ({} <= {})",
-                    i, candle.timestamp, prev_ts
-                )));
-            }
+        if let Some(prev_ts) = prev_timestamp
+            && candle.timestamp <= prev_ts
+        {
+            return Err(MantisError::BacktestError(format!(
+                "candle {} has non-increasing timestamp ({} <= {})",
+                i, candle.timestamp, prev_ts
+            )));
         }
         prev_timestamp = Some(candle.timestamp);
     }
