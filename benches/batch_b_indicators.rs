@@ -1,5 +1,7 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use mantis_ta::indicators::{Ichimoku, Indicator, KeltnerChannels, MFI, ParabolicSar, VWAP};
+use mantis_ta::indicators::{
+    AccumDist, Ichimoku, Indicator, KeltnerChannels, MFI, ParabolicSar, VWAP,
+};
 use mantis_ta::types::Candle;
 
 fn generate_candles(count: usize) -> Vec<Candle> {
@@ -128,6 +130,28 @@ fn bench_vwap_batch(c: &mut Criterion) {
     });
 }
 
+fn bench_accum_dist_streaming(c: &mut Criterion) {
+    c.bench_function("accum_dist_streaming_252_bars", |b| {
+        let candles = black_box(generate_candles(252));
+        b.iter(|| {
+            let mut ad = AccumDist::new();
+            for candle in &candles {
+                let _ = ad.next(candle);
+            }
+        });
+    });
+}
+
+fn bench_accum_dist_batch(c: &mut Criterion) {
+    c.bench_function("accum_dist_batch_252_bars", |b| {
+        let candles = black_box(generate_candles(252));
+        let ad = AccumDist::new();
+        b.iter(|| {
+            let _ = ad.calculate(&candles);
+        });
+    });
+}
+
 criterion_group!(
     benches,
     bench_ichimoku_streaming,
@@ -140,5 +164,7 @@ criterion_group!(
     bench_keltner_batch,
     bench_vwap_streaming,
     bench_vwap_batch,
+    bench_accum_dist_streaming,
+    bench_accum_dist_batch,
 );
 criterion_main!(benches);

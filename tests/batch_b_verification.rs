@@ -1,4 +1,4 @@
-use mantis_ta::indicators::{Ichimoku, Indicator, KeltnerChannels, ParabolicSar, VWAP};
+use mantis_ta::indicators::{AccumDist, Ichimoku, Indicator, KeltnerChannels, ParabolicSar, VWAP};
 use mantis_ta::types::Candle;
 
 fn create_ohlc_candles(highs: &[f64], lows: &[f64], closes: &[f64]) -> Vec<Candle> {
@@ -364,4 +364,102 @@ fn verify_vwap_reset_functionality() {
 
     vwap.reset();
     assert_eq!(vwap.next(&candles[0]), None);
+}
+
+#[test]
+fn verify_accum_dist_no_warmup_and_matches_manual_calculation() {
+    // Bar 1: H=12,L=8,C=10,V=100 -> CLV=((10-8)-(12-10))/4=0        -> AD=0
+    // Bar 2: H=13,L=9,C=12,V=200 -> CLV=((12-9)-(13-12))/4=0.5      -> AD=0+100=100
+    // Bar 3: H=11,L=7,C=8, V=150 -> CLV=((8-7)-(11-8))/4=-0.5       -> AD=100-75=25
+    let candles = create_ohlcv_candles(
+        &[12.0, 13.0, 11.0],
+        &[8.0, 9.0, 7.0],
+        &[10.0, 12.0, 8.0],
+        &[100.0, 200.0, 150.0],
+    );
+
+    let ad = AccumDist::new();
+    let outputs = ad.calculate(&candles);
+
+    assert_eq!(ad.warmup_period(), 0);
+    assert!(outputs.iter().all(|o| o.is_some()));
+    assert!((outputs[0].unwrap() - 0.0).abs() < 1e-9);
+    assert!((outputs[1].unwrap() - 100.0).abs() < 1e-9);
+    assert!((outputs[2].unwrap() - 25.0).abs() < 1e-9);
+}
+
+#[test]
+fn verify_accum_dist_close_at_high_accumulates_full_volume() {
+    // Close pinned to the bar's high -> money flow multiplier == 1, so AD
+    // becomes the running sum of volume (strict accumulation).
+    let n = 10;
+    let volumes: Vec<f64> = (0..n).map(|i| 100.0 + i as f64 * 10.0).collect();
+    let highs = vec![110.0; n];
+    let lows = vec![90.0; n];
+    let closes = vec![110.0; n];
+    let candles = create_ohlcv_candles(&highs, &lows, &closes, &volumes);
+
+    let outputs = AccumDist::new().calculate(&candles);
+    let expected_total: f64 = volumes.iter().sum();
+    assert!((outputs.last().unwrap().unwrap() - expected_total).abs() < 1e-9);
+}
+
+#[test]
+fn verify_accum_dist_close_at_low_distributes_full_volume() {
+    // Close pinned to the bar's low -> money flow multiplier == -1, so AD
+    // becomes the running negative sum of volume (strict distribution).
+    let n = 10;
+    let volumes: Vec<f64> = (0..n).map(|i| 100.0 + i as f64 * 10.0).collect();
+    let highs = vec![110.0; n];
+    let lows = vec![90.0; n];
+    let closes = vec![90.0; n];
+    let candles = create_ohlcv_candles(&highs, &lows, &closes, &volumes);
+
+    let outputs = AccumDist::new().calculate(&candles);
+    let expected_total: f64 = -volumes.iter().sum::<f64>();
+    assert!((outputs.last().unwrap().unwrap() - expected_total).abs() < 1e-9);
+}
+
+#[test]
+fn verify_accum_dist_zero_range_bar_is_a_no_op() {
+    // High == Low (zero range) must not divide by zero and must contribute
+    // nothing to the running total (TA-Lib's AD guards this case as 0).
+    let candles = create_ohlcv_candles(&[100.0], &[100.0], &[100.0], &[5_000.0]);
+    let outputs = AccumDist::new().calculate(&candles);
+    assert!((outputs[0].unwrap() - 0.0).abs() < 1e-9);
+}
+
+#[test]
+fn verify_accum_dist_streaming_matches_batch() {
+    let candles = trending_candles(60);
+    let mut streaming = AccumDist::new();
+    let batch_outputs = AccumDist::new().calculate(&candles);
+
+    for (i, candle) in candles.iter().enumerate() {
+        let streamed = streaming.next(candle);
+        assert_eq!(streamed, batch_outputs[i], "mismatch at index {i}");
+    }
+}
+
+#[test]
+fn verify_accum_dist_reset_functionality() {
+    // trending_candles() centers close exactly between high/low (CLV == 0
+    // every bar), so use a series where close is offset toward the high to
+    // exercise real accumulation.
+    let n = 20;
+    let closes: Vec<f64> = (0..n).map(|i| 100.0 + i as f64).collect();
+    let highs: Vec<f64> = closes.iter().map(|c| c + 1.0).collect();
+    let lows: Vec<f64> = closes.iter().map(|c| c - 3.0).collect();
+    let candles = create_ohlc_candles(&highs, &lows, &closes);
+    let mut ad = AccumDist::new();
+
+    for candle in &candles {
+        ad.next(candle);
+    }
+    let accumulated = ad.next(&candles[0]).unwrap();
+    assert!(accumulated != 0.0);
+
+    ad.reset();
+    let mut fresh = AccumDist::new();
+    assert_eq!(ad.next(&candles[0]), fresh.next(&candles[0]));
 }

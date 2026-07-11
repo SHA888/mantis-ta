@@ -68,7 +68,7 @@ pub use obv::OBV;
 pub use support_resistance::PivotPoints;
 pub use trend::{ADX, DEMA, EMA, Ichimoku, MACD, ParabolicSar, SMA, TEMA, WMA};
 pub use volatility::{ATR, BollingerBands, KeltnerChannels, StdDev};
-pub use volume::{VWAP, VolumeSMA};
+pub use volume::{AccumDist, VWAP, VolumeSMA};
 
 /// Core interface for all streaming technical indicators.
 ///
