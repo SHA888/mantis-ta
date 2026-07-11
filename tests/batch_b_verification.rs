@@ -366,28 +366,11 @@ fn verify_vwap_reset_functionality() {
     assert_eq!(vwap.next(&candles[0]), None);
 }
 
-#[test]
-fn verify_accum_dist_no_warmup_and_matches_manual_calculation() {
-    // Bar 1: H=12,L=8,C=10,V=100 -> CLV=((10-8)-(12-10))/4=0        -> AD=0
-    // Bar 2: H=13,L=9,C=12,V=200 -> CLV=((12-9)-(13-12))/4=0.5      -> AD=0+100=100
-    // Bar 3: H=11,L=7,C=8, V=150 -> CLV=((8-7)-(11-8))/4=-0.5       -> AD=100-75=25
-    let candles = create_ohlcv_candles(
-        &[12.0, 13.0, 11.0],
-        &[8.0, 9.0, 7.0],
-        &[10.0, 12.0, 8.0],
-        &[100.0, 200.0, 150.0],
-    );
-
-    let ad = AccumDist::new();
-    let outputs = ad.calculate(&candles);
-
-    assert_eq!(ad.warmup_period(), 0);
-    assert!(outputs.iter().all(|o| o.is_some()));
-    assert!((outputs[0].unwrap() - 0.0).abs() < 1e-9);
-    assert!((outputs[1].unwrap() - 100.0).abs() < 1e-9);
-    assert!((outputs[2].unwrap() - 25.0).abs() < 1e-9);
-}
-
+// Formula/manual-calculation parity for A/D is covered by the inline unit test
+// in `accum_dist.rs` and, over a 2000-bar series, by the native TA-Lib parity
+// test `verify_accum_dist` in `tests/indicator_verification`. The tests below
+// cover behaviors those don't: boundary bars, zero-range no-op, streaming/batch
+// equivalence, and reset.
 #[test]
 fn verify_accum_dist_close_at_high_accumulates_full_volume() {
     // Close pinned to the bar's high -> money flow multiplier == 1, so AD
