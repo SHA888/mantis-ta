@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.7] — 2026-07-14
+
+### Added
+- **Donchian Channels indicator**: New `DonchianChannels` streaming support/resistance indicator computing the rolling highest-high / lowest-low over a window (`DonchianOutput { upper, middle, lower }`), commonly used for breakout detection and trailing-stop placement. `warmup_period() == period`. Verified against a TA-Lib-parity fixture (`fixtures/generate_donchian_reference.py`) — windowed MAX/MIN is exact and order-independent, so a pure-Python reimplementation matches TA-Lib's native `MAX`/`MIN` functions bit-for-bit without requiring the native library.
+
+### Fixed
+- **A/D Line TA-Lib parity fixture**: The `verify_accum_dist` test previously compared against `ad.json` generated from the shared `spy_daily_5y.csv` fixture, where `close` sits exactly at the `high`/`low` midpoint on every bar — making the money-flow-multiplier ~0 everywhere and the test unable to distinguish a correct `AccumDist` implementation from a broken one. `generate_ad_reference.py` now generates a dedicated dataset (`ad_parity_synthetic.csv`) where close's position within the high/low range varies bar-to-bar, and `ad.json` is regenerated against it via real `talib.AD`.
+
 ## [0.6.6] — 2026-07-13
 
 ### Added
