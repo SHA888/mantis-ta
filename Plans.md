@@ -23,6 +23,7 @@ Product contract for indicator correctness: [SPEC.md](./SPEC.md) §4.2 Indicator
 | 6.5 | VWAP — Volume Weighted Average Price (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:done [74e3fa9] |
 | 6.6 | Accumulation/Distribution Line (`f64`) | Satisfies SPEC §4.2 checklist | - | cc:done [4c1ccfd] |
 | 6.7 | Donchian Channels (`DonchianOutput`) | Satisfies SPEC §4.2 checklist | - | cc:TODO |
+| 6.6.1 | Fix A/D Line TA-Lib parity fixture — regenerate `ad.json` against a non-degenerate dataset | Money-flow-multiplier is non-trivial (`\|MFM\|` not ~0) across the reference series so the fixture can actually discriminate a correct AD implementation from a broken one (sign flip, swapped high/low, missing division); regenerated via real `talib.AD` per `generate_ad_reference.py`'s existing design; `cargo test --all-features` passes | 6.6 | cc:TODO |
 | 6.8 | `IndicatorRef` convenience constructors for all Batch B indicators | Each of 6.1-6.7 has a matching `IndicatorRef` constructor; `cargo test` passes | 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7 | cc:TODO |
 | 6.9 | Verify Batch B indicators work in strategy builder → eval → signal flow | Integration test exercises each new indicator through builder → eval → signal for at least one condition; `cargo test --all-features` passes | 6.8 | cc:TODO |
 
