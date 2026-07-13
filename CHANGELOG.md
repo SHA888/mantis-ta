@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.6] — 2026-07-13
+
+### Added
+- **Accumulation/Distribution Line indicator**: New `AccumDist` streaming volume indicator computing TA-Lib's cumulative money-flow-weighted volume line (`MFM = ((close-low)-(high-close))/(high-low)`, `AD = AD_prev + MFM*volume`, with `MFM=0` on zero-range bars). No warmup (`warmup_period() == 0`). Verified against a TA-Lib fixture (`fixtures/generate_ad_reference.py`, `ad.json`), plus dedicated unit tests exercising close-at-high/close-at-low CLV extremes.
+
+### Fixed
+- **`RUSTSEC-2026-0204` advisory in `crossbeam-epoch`**: Updated the dev-only `crossbeam-epoch` transitive dependency (via `criterion` → `rayon`) from 0.9.18 to 0.9.20, resolving a `cargo-deny` advisory failure that was blocking CI on `main`. Not part of the published crate's dependency tree (dev-dependency only, used for benchmarks).
+
 ## [0.6.5] — 2026-07-03
 
 ### Added
