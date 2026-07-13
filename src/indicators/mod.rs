@@ -65,7 +65,7 @@ pub mod volatility;
 pub mod volume;
 pub use momentum::{CCI, MFI, ROC, RSI, Stochastic, WilliamsR};
 pub use obv::OBV;
-pub use support_resistance::PivotPoints;
+pub use support_resistance::{DonchianChannels, PivotPoints};
 pub use trend::{ADX, DEMA, EMA, Ichimoku, MACD, ParabolicSar, SMA, TEMA, WMA};
 pub use volatility::{ATR, BollingerBands, KeltnerChannels, StdDev};
 pub use volume::{AccumDist, VWAP, VolumeSMA};
@@ -110,4 +110,6 @@ pub trait IncrementalIndicator: Indicator {
 }
 
 // Re-export common types for convenience.
-pub use crate::types::{BollingerOutput, KeltnerOutput, MacdOutput, PivotOutput, StochasticOutput};
+pub use crate::types::{
+    BollingerOutput, DonchianOutput, KeltnerOutput, MacdOutput, PivotOutput, StochasticOutput,
+};

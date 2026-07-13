@@ -1,6 +1,6 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use mantis_ta::indicators::{
-    AccumDist, Ichimoku, Indicator, KeltnerChannels, MFI, ParabolicSar, VWAP,
+    AccumDist, DonchianChannels, Ichimoku, Indicator, KeltnerChannels, MFI, ParabolicSar, VWAP,
 };
 use mantis_ta::types::Candle;
 
@@ -152,6 +152,28 @@ fn bench_accum_dist_batch(c: &mut Criterion) {
     });
 }
 
+fn bench_donchian_streaming(c: &mut Criterion) {
+    c.bench_function("donchian_streaming_252_bars", |b| {
+        let candles = black_box(generate_candles(252));
+        b.iter(|| {
+            let mut dc = DonchianChannels::new(20);
+            for candle in &candles {
+                let _ = dc.next(candle);
+            }
+        });
+    });
+}
+
+fn bench_donchian_batch(c: &mut Criterion) {
+    c.bench_function("donchian_batch_252_bars", |b| {
+        let candles = black_box(generate_candles(252));
+        let dc = DonchianChannels::new(20);
+        b.iter(|| {
+            let _ = dc.calculate(&candles);
+        });
+    });
+}
+
 criterion_group!(
     benches,
     bench_ichimoku_streaming,
@@ -166,5 +188,7 @@ criterion_group!(
     bench_vwap_batch,
     bench_accum_dist_streaming,
     bench_accum_dist_batch,
+    bench_donchian_streaming,
+    bench_donchian_batch,
 );
 criterion_main!(benches);

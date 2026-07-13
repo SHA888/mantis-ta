@@ -99,6 +99,15 @@ pub struct KeltnerOutput {
     pub lower: f64,
 }
 
+/// Donchian Channels output values.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DonchianOutput {
+    pub upper: f64,
+    pub middle: f64,
+    pub lower: f64,
+}
+
 /// Stochastic oscillator output values.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, PartialEq)]
