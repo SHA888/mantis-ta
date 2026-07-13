@@ -16,7 +16,7 @@ Every indicator is verified against [TA-Lib](https://ta-lib.org/) reference outp
 
 ```toml
 [dependencies]
-mantis-ta = "0.6.5"
+mantis-ta = "0.6.7"
 ```
 
 ## Quick Start
@@ -121,21 +121,24 @@ println!("Trades:       {}",     result.metrics.total_trades);
 
 ### Trend
 **v0.5.0 Batch A:** `SMA` · `EMA` · `WMA` · `DEMA` · `TEMA` · `MACD` · `ADX`
-**Future:** `Ichimoku` · `Parabolic SAR` · `Supertrend`
+**v0.6.x Batch B:** `Ichimoku` · `Parabolic SAR`
+**Future:** `Supertrend`
 
 ### Momentum
 **v0.5.0 Batch A:** `RSI` · `Stochastic` · `CCI` · `Williams %R` · `ROC`
-**Future:** `MFI`
+**v0.6.x Batch B:** `MFI`
 
 ### Volatility
 **v0.5.0 Batch A:** `Bollinger Bands` · `ATR` · `Standard Deviation`
-**Future:** `Keltner Channels`
+**v0.6.x Batch B:** `Keltner Channels`
 
 ### Volume
 `OBV` · `Volume SMA` · `VWAP` · `Accumulation/Distribution`
 
 ### Support/Resistance
-`Pivot Points` · `Donchian Channels` · `Fibonacci Retracement`
+**v0.1.0 Tier 1:** `Pivot Points`
+**v0.6.x Batch B:** `Donchian Channels`
+**Future:** `Fibonacci Retracement`
 
 See the [full indicator list](https://docs.rs/mantis-ta/latest/mantis_ta/indicators/) in the API docs.
 
@@ -143,7 +146,7 @@ See the [full indicator list](https://docs.rs/mantis-ta/latest/mantis_ta/indicat
 
 ```toml
 [dependencies]
-mantis-ta = { version = "0.5", features = ["strategy", "backtest"] }
+mantis-ta = { version = "0.6.7", features = ["strategy", "backtest"] }
 ```
 
 | Feature | Default | Description |
